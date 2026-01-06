@@ -1,6 +1,6 @@
 
 import { PathOptions } from 'leaflet';
-import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, LegendItem } from './layerStyles';
+import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, LegendItem, transparentStyle } from './layerStyles';
 
 export interface GisLayer {
     id: string;
@@ -90,7 +90,8 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#FF6F00',
         category: 'administrative',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     },
     {
         id: 'resiko_banjir_bandang',
@@ -100,7 +101,8 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#D32F2F',
         category: 'risk',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     },
     {
         id: 'resiko_banjir_pbd',
@@ -110,7 +112,8 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#C62828',
         category: 'risk',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     },
     {
         id: 'resiko_longsor',
@@ -120,7 +123,8 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#795548',
         category: 'risk',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     },
     {
         id: 'lokasi_iplt',
@@ -220,7 +224,8 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#8BC34A',
         category: 'environment',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     },
     {
         id: 'kwsn_hutan_new',
@@ -230,6 +235,7 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#388E3C',
         category: 'environment',
-        highlightable: true
+        highlightable: true,
+        styleFunction: transparentStyle
     }
 ];

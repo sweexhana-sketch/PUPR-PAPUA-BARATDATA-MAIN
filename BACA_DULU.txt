@@ -1,0 +1,128 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║  PENTING! BACA INI DULU SEBELUM MENJALANKAN WEBGIS             ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+MASALAH YANG ANDA ALAMI:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Error: "localhost refused to connect" / "ERR_CONNECTION_REFUSED"
+
+PENYEBAB:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Server development BELUM DIJALANKAN atau sudah mati.
+
+Ini seperti mencoba menonton TV yang belum dinyalakan.
+Browser tidak bisa menampilkan website karena tidak ada yang 
+melayani di port 3000.
+
+
+SOLUSI - IKUTI LANGKAH INI DENGAN TELITI:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LANGKAH 1: CEK NODE.JS
+──────────────────────────────────────────────────────────────────
+1. Tekan tombol Windows + R
+2. Ketik: cmd
+3. Tekan Enter
+4. Di jendela hitam yang muncul, ketik: node -v
+5. Tekan Enter
+
+HASIL YANG DIHARAPKAN:
+  ✓ Muncul versi seperti: v20.11.0 atau v18.x.x
+  
+JIKA MUNCUL ERROR:
+  ✗ "node is not recognized..."
+  → Node.js belum terinstall!
+  → Download dari: https://nodejs.org/
+  → Install, lalu RESTART KOMPUTER
+  → Ulangi dari Langkah 1
+
+
+LANGKAH 2: INSTALL DEPENDENCIES (HANYA SEKALI)
+──────────────────────────────────────────────────────────────────
+1. Buka folder ini di File Explorer:
+   C:\Users\User\Downloads\PUPR-PAPUA-BARATDATA-MAIN-main
+
+2. Di address bar File Explorer, ketik: cmd
+   (Ini akan membuka CMD di folder tersebut)
+
+3. Di jendela CMD yang muncul, ketik: npm install
+4. Tekan Enter
+5. TUNGGU sampai selesai (bisa 5-15 menit)
+   Akan muncul banyak tulisan - ini normal!
+
+CATATAN: Langkah ini HANYA perlu dilakukan SEKALI saja.
+         Jika sudah pernah, skip ke Langkah 3.
+
+
+LANGKAH 3: JALANKAN SERVER
+──────────────────────────────────────────────────────────────────
+PILIHAN A - PAKAI FILE .BAT (TERMUDAH):
+  1. Di File Explorer, cari file: MULAI_SERVER.bat
+  2. DOUBLE-CLICK file tersebut
+  3. Jendela hitam akan muncul
+  4. TUNGGU sampai muncul tulisan:
+     "Local: http://localhost:3000/"
+  5. JANGAN TUTUP jendela hitam tersebut!
+  6. Buka browser (Chrome/Edge)
+  7. Ketik di address bar: http://localhost:3000/webgis
+  8. Tekan Enter
+
+PILIHAN B - MANUAL (JIKA PILIHAN A GAGAL):
+  1. Buka CMD di folder ini (seperti Langkah 2 poin 1-2)
+  2. Ketik: npm run dev
+  3. Tekan Enter
+  4. Tunggu sampai muncul: "Local: http://localhost:3000/"
+  5. JANGAN TUTUP jendela CMD!
+  6. Buka browser, ketik: http://localhost:3000/webgis
+
+
+TANDA-TANDA SERVER SUDAH JALAN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Di jendela CMD/terminal, Anda akan melihat:
+
+  VITE v5.x.x  ready in xxx ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.x.x:3000/
+  ➜  press h + enter to show help
+
+Jika sudah muncul seperti ini, berarti server SUDAH JALAN!
+
+
+KESALAHAN YANG SERING TERJADI:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ Membuka browser SEBELUM server jalan
+   → Tunggu dulu sampai muncul "Local: http://localhost:3000/"
+
+❌ Menutup jendela CMD/terminal
+   → Server akan mati! Biarkan tetap terbuka.
+
+❌ Tidak menjalankan "npm install" dulu
+   → Akan muncul banyak error. Jalankan "npm install" dulu.
+
+❌ Node.js belum terinstall
+   → Semua command npm tidak akan jalan.
+
+
+JIKA MASIH BERMASALAH:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Screenshot 3 hal ini dan kirim ke tim IT:
+1. Jendela CMD saat menjalankan "npm run dev"
+2. Browser yang menunjukkan error
+3. Hasil dari command "node -v" di CMD
+
+═══════════════════════════════════════════════════════════════════
+
+CATATAN PENTING UNTUK DEVELOPER/IT:
+Kode aplikasi sudah diperbaiki dengan fitur:
+- Transparansi layer polygon (fillOpacity: 0)
+- Popup atribut lengkap dari SHP file
+- Error boundary untuk debugging
+- Null-safe style functions
+
+Masalah saat ini BUKAN di kode, tapi di environment setup.
+User perlu menjalankan development server terlebih dahulu.
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,67 @@
+═══════════════════════════════════════════════════════════════
+  CARA MENJALANKAN WEBGIS PUPR PAPUA BARAT DAYA
+═══════════════════════════════════════════════════════════════
+
+LANGKAH 1: PASTIKAN NODE.JS SUDAH TERINSTALL
+────────────────────────────────────────────────────────────────
+Buka Command Prompt (CMD) dan ketik:
+    node -v
+
+Jika muncul versi (contoh: v20.11.0), berarti sudah terinstall.
+Jika muncul error, download dan install dari: https://nodejs.org/
+
+
+LANGKAH 2: INSTALL DEPENDENCIES (HANYA SEKALI DI AWAL)
+────────────────────────────────────────────────────────────────
+1. Buka folder ini di File Explorer
+2. Klik kanan di area kosong, pilih "Open in Terminal" 
+   (atau "Git Bash Here" jika ada)
+3. Ketik perintah:
+    npm install
+4. Tunggu sampai selesai (bisa 5-10 menit)
+
+
+LANGKAH 3: JALANKAN SERVER
+────────────────────────────────────────────────────────────────
+CARA A - DOUBLE CLICK (TERMUDAH):
+  1. Double-click file "MULAI_SERVER.bat"
+  2. Tunggu sampai muncul tulisan "Local: http://localhost:3000/"
+  3. Buka browser, ketik: http://localhost:3000/webgis
+
+CARA B - MANUAL (JIKA CARA A TIDAK JALAN):
+  1. Buka Terminal/CMD di folder ini
+  2. Ketik: npm run dev
+  3. Tunggu sampai muncul "Local: http://localhost:3000/"
+  4. Buka browser, ketik: http://localhost:3000/webgis
+
+
+TROUBLESHOOTING
+────────────────────────────────────────────────────────────────
+❌ "npm is not recognized"
+   → Node.js belum terinstall atau belum masuk PATH
+   → Restart komputer setelah install Node.js
+
+❌ "ERR_CONNECTION_REFUSED" 
+   → Server belum jalan atau sudah mati
+   → Pastikan jendela terminal/CMD masih terbuka
+   → Jalankan ulang "npm run dev"
+
+❌ "Port 3000 is already in use"
+   → Ada aplikasi lain yang pakai port 3000
+   → Tutup semua terminal/CMD yang terbuka
+   → Atau restart komputer
+
+❌ Halaman putih/blank
+   → Tekan F5 untuk refresh
+   → Tekan Ctrl+Shift+R untuk hard refresh
+   → Buka browser console (F12) dan screenshot errornya
+
+
+KONTAK SUPPORT
+────────────────────────────────────────────────────────────────
+Jika masih bermasalah, screenshot:
+1. Jendela terminal/CMD yang menjalankan "npm run dev"
+2. Browser yang menunjukkan error
+3. Kirim ke tim IT untuk bantuan lebih lanjut
+
+═══════════════════════════════════════════════════════════════

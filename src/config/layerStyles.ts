@@ -8,7 +8,7 @@ export interface LegendItem {
 
 // SK Hutan (Forest Decree) styling
 export const skHutanStyle = (feature: any): PathOptions => {
-    const props = feature.properties;
+    const props = feature?.properties || {};
     const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.NAMOBJ || '';
 
     let color = '#2E7D32'; // Default: dark green
@@ -30,7 +30,7 @@ export const skHutanStyle = (feature: any): PathOptions => {
         color: color,
         weight: 2,
         opacity: 0.8,
-        fillOpacity: 0.4
+        fillOpacity: 0 // Transparent fill as requested
     };
 };
 
@@ -44,7 +44,7 @@ export const skHutanLegend: LegendItem[] = [
 
 // Flood Risk styling
 export const floodRiskStyle = (feature: any): PathOptions => {
-    const props = feature.properties;
+    const props = feature?.properties || {};
     // Try different possible field names for risk level
     const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '';
     const riskValue = props.NILAI || props.VALUE || 0;
@@ -93,7 +93,7 @@ export const floodRiskLegend: LegendItem[] = [
 
 // Contour styling based on elevation intervals
 export const contourStyle = (feature: any): PathOptions => {
-    const props = feature.properties;
+    const props = feature?.properties || {};
     const elevation = props.ELEV || props.ELEVATION || props.CONTOUR || props.HEIGHT || 0;
 
     let weight = 1;
@@ -140,3 +140,30 @@ export const highlightStyle: PathOptions = {
     opacity: 1,
     fillOpacity: 0.7
 };
+
+// Transparent style for polygon layers that need to show background
+export const transparentStyle = (feature: any): PathOptions => {
+    // Determine color based on layer ID or property (passed via closure if needed, but for now simple)
+    // We can stick to the layer's default color which is usually handled in MapViewer if this returns partial options,
+    // usually MapViewer handles defaults. However, styleFunction in MapViewer overrides defaults.
+    // So we need to return specific colors or let MapViewer handle it. 
+    // Actually, MapViewer calls: 
+    // const customStyle = layer.styleFunction(feature);
+    // return { ...customStyle, opacity: ... }
+
+    // We will return standard weight/opacity but NO FILL.
+    return {
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0 // Transparent fill
+    };
+};
+
+export const transparentFloodRiskStyle = (feature: any): PathOptions => {
+    const baseStyle = floodRiskStyle(feature);
+    return {
+        ...baseStyle,
+        fillOpacity: 0
+    };
+};
+

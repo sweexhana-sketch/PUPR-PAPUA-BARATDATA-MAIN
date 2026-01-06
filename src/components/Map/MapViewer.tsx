@@ -176,6 +176,30 @@ export const MapViewer: React.FC = () => {
             const props = feature.properties;
             let popupContent = '';
 
+            // Helper to generate full attribute table
+            const generateAttributesTable = (properties: any) => {
+                const entries = Object.entries(properties);
+                const tableRows = entries
+                    .filter(([_, value]) => value !== null && value !== undefined)
+                    .map(([key, value]) => `
+                        <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
+                            <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50 break-words w-1/3">${key}</td>
+                            <td class="p-2 text-xs text-gray-900 break-all">${value}</td>
+                        </tr>
+                    `).join('');
+
+                return `
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-xs text-gray-500 mb-2 uppercase tracking-wider">Detail Atribut</h4>
+                        <div class="max-h-[200px] overflow-y-auto border border-gray-200 rounded">
+                            <table class="w-full border-collapse">
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            };
+
             // Layer-specific popup content
             if (layerId === 'bts_desa') {
                 // Batas Desa - Show administrative hierarchy
@@ -200,6 +224,7 @@ export const MapViewer: React.FC = () => {
                                 <div class="text-sm font-bold text-purple-800">${kabupaten}</div>
                             </div>
                         </div>
+                        ${generateAttributesTable(props)}
                     </div>
                 `;
             } else if (layerId === 'sk_hutan') {
@@ -249,6 +274,7 @@ export const MapViewer: React.FC = () => {
                             </div>
                             ` : ''}
                         </div>
+                        ${generateAttributesTable(props)}
                     </div>
                 `;
             } else if (layerId === 'dis_banjir') {
@@ -295,6 +321,7 @@ export const MapViewer: React.FC = () => {
                             </div>
                             ` : ''}
                         </div>
+                        ${generateAttributesTable(props)}
                     </div>
                 `;
             } else if (layerId === 'jln_provinsi') {
@@ -322,6 +349,7 @@ export const MapViewer: React.FC = () => {
                             </div>
                             ` : ''}
                         </div>
+                        ${generateAttributesTable(props)}
                     </div>
                 `;
             } else {
@@ -329,17 +357,16 @@ export const MapViewer: React.FC = () => {
                 const entries = Object.entries(props);
                 const tableRows = entries
                     .filter(([_, value]) => value !== null && value !== undefined)
-                    .slice(0, 10) // Limit to 10 rows
                     .map(([key, value]) => `
-                        <tr class="border-b border-gray-200">
-                            <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50">${key}</td>
-                            <td class="p-2 text-xs text-gray-900">${value}</td>
+                        <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
+                            <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50 break-words w-1/3">${key}</td>
+                            <td class="p-2 text-xs text-gray-900 break-all">${value}</td>
                         </tr>
                     `).join('');
 
                 popupContent = `
-                    <div class="min-w-[250px] max-h-[300px] overflow-y-auto">
-                        <h3 class="font-bold text-sm mb-2 text-teal-700 border-b pb-1">${layer.name}</h3>
+                    <div class="min-w-[250px] max-h-[400px] overflow-y-auto">
+                        <h3 class="font-bold text-sm mb-2 text-teal-700 border-b pb-1 overflow-hidden text-ellipsis whitespace-nowrap" title="${layer.name}">${layer.name}</h3>
                         <table class="w-full border-collapse">
                             <tbody>${tableRows}</tbody>
                         </table>
@@ -377,9 +404,10 @@ export const MapViewer: React.FC = () => {
         if (layer.styleFunction) {
             const customStyle = layer.styleFunction(feature);
             return {
+                color: layer.color, // Default to layer color if not in customStyle
                 ...customStyle,
-                opacity: (customStyle.opacity || 1) * opacity,
-                fillOpacity: (customStyle.fillOpacity || 0.3) * opacity
+                opacity: (customStyle.opacity !== undefined ? customStyle.opacity : 1) * opacity,
+                fillOpacity: (customStyle.fillOpacity !== undefined ? customStyle.fillOpacity : 0.3) * opacity
             };
         }
 
@@ -396,7 +424,7 @@ export const MapViewer: React.FC = () => {
     const currentBasemap = BASEMAPS.find(b => b.id === selectedBasemap) || BASEMAPS[0];
 
     return (
-        <div ref={mapContainerRef} className="relative w-full h-screen flex flex-col">
+        <div ref={mapContainerRef} className="relative w-full h-screen flex flex-col" style={{ height: '100vh', minHeight: '600px' }}>
             <WebGISNavbar onFullscreenToggle={handleFullscreenToggle} />
 
             <div className="flex-1 relative">
