@@ -4,7 +4,6 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock } from "lucide-react";
 
 const Login = () => {
     const [password, setPassword] = useState("");
@@ -29,9 +28,11 @@ const Login = () => {
             <Card className="w-full max-w-md shadow-lg">
                 <CardHeader className="space-y-1 text-center">
                     <div className="flex justify-center mb-4">
-                        <div className="p-3 bg-primary/10 rounded-full">
-                            <Lock className="w-8 h-8 text-primary" />
-                        </div>
+                        <img
+                            src="/images/logo-papua-barat-daya-new.png"
+                            alt="Logo Papua Barat Daya"
+                            className="h-24 w-auto object-contain"
+                        />
                     </div>
                     <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
                     <CardDescription>
