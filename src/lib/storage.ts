@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
     PROFILE: "site_profile",
     HERO: "site_hero",
     CONTACT: "site_contact",
+    SOP: "site_sop",
 };
 
 // Default Data (moved from components)
@@ -113,6 +114,15 @@ const DEFAULT_NEWS = [
         image: "https://images.unsplash.com/photo-1538300342682-cf57afb97285?q=80&w=1974&auto=format&fit=crop",
         category: "Cipta Karya"
     }
+];
+
+const DEFAULT_SOP = [
+    { id: 1, title: "SOP Bidang Sumber Daya Air", file: "/documents/SOP-SDA.rar", size: "RAR", code: "SOP-SDA-001" },
+    { id: 2, title: "SOP Bidang Bina Marga", file: "/documents/SOP-BM.rar", size: "RAR", code: "SOP-BM-001" },
+    { id: 3, title: "SOP Bidang Cipta Karya", file: "/documents/SOP-CK.rar", size: "RAR", code: "SOP-CK-001" },
+    { id: 4, title: "SOP Bidang Perumahan", file: "/documents/SOP-PR.rar", size: "RAR", code: "SOP-PR-001" },
+    { id: 5, title: "SOP Bina Konstruksi", file: "/documents/SOP-BK.rar", size: "RAR", code: "SOP-BK-001" },
+    { id: 6, title: "SOP Sekretariat", file: "/documents/SOP-SEK.rar", size: "RAR", code: "SOP-SEK-001" },
 ];
 
 const DEFAULT_GALLERY = [
@@ -265,7 +275,7 @@ const DEFAULT_PROFILE = {
     seksiBinamarga: {
         perencanaan: "DEDY JUNAIDY ARIYANTO, S.T.",
         pembangunan: "-",
-        reservasi: "ISHAK SAPAN RUMAPAR, S.T., M.T."
+        reservasi: "ISHAK SAPAN RUMAPAK, S.T., M.T."
     },
     seksiCiptakarya: {
         penyehatan: "MAYKEL FILEMON FRASAWI, S.T.",
@@ -318,6 +328,7 @@ export const getGallery = () => getStorageData(STORAGE_KEYS.GALLERY, DEFAULT_GAL
 export const getProfile = () => getStorageData(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
 export const getHeroSlides = () => getStorageData(STORAGE_KEYS.HERO, DEFAULT_HERO);
 export const getContact = () => getStorageData(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT);
+export const getSOP = () => getStorageData(STORAGE_KEYS.SOP, DEFAULT_SOP);
 
 // Specific setters
 export const saveNews = (data: any) => setStorageData(STORAGE_KEYS.NEWS, data);
@@ -325,3 +336,4 @@ export const saveGallery = (data: any) => setStorageData(STORAGE_KEYS.GALLERY, d
 export const saveProfile = (data: any) => setStorageData(STORAGE_KEYS.PROFILE, data);
 export const saveHeroSlides = (data: any) => setStorageData(STORAGE_KEYS.HERO, data);
 export const saveContact = (data: any) => setStorageData(STORAGE_KEYS.CONTACT, data);
+export const saveSOP = (data: any) => setStorageData(STORAGE_KEYS.SOP, data);

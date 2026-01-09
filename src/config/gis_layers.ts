@@ -1,6 +1,5 @@
-
 import { PathOptions } from 'leaflet';
-import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, LegendItem, transparentStyle } from './layerStyles';
+import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, kemampuanLahanStyle, kemampuanLahanLegend, longsorRiskStyle, longsorRiskLegend, banjirBandangRiskStyle, banjirBandangRiskLegend, LegendItem, transparentStyle, batasDesaHighlightStyle } from './layerStyles';
 
 export interface GisLayer {
     id: string;
@@ -85,9 +84,9 @@ export const GIS_LAYERS: GisLayer[] = [
     {
         id: 'bts_desa',
         name: 'Batas Desa',
-        file: 'btsdesa (2).json',
-        url: 'https://qbvlqrjewdetjkvvszjq.supabase.co/storage/v1/object/public/webgis-data/btsdesa%20(2).json',
-        visible: false,
+        file: 'batasdesapbd_new.js',
+        url: '/data/batasdesapbd_new.js',
+        visible: true,
         color: '#FF6F00',
         category: 'administrative',
         highlightable: true,
@@ -102,7 +101,8 @@ export const GIS_LAYERS: GisLayer[] = [
         color: '#D32F2F',
         category: 'risk',
         highlightable: true,
-        styleFunction: transparentStyle
+        styleFunction: banjirBandangRiskStyle,
+        legendItems: banjirBandangRiskLegend
     },
     {
         id: 'resiko_banjir_pbd',
@@ -113,7 +113,8 @@ export const GIS_LAYERS: GisLayer[] = [
         color: '#C62828',
         category: 'risk',
         highlightable: true,
-        styleFunction: transparentStyle
+        styleFunction: floodRiskStyle,
+        legendItems: floodRiskLegend
     },
     {
         id: 'resiko_longsor',
@@ -124,7 +125,8 @@ export const GIS_LAYERS: GisLayer[] = [
         color: '#795548',
         category: 'risk',
         highlightable: true,
-        styleFunction: transparentStyle
+        styleFunction: longsorRiskStyle,
+        legendItems: longsorRiskLegend
     },
     {
         id: 'lokasi_iplt',
@@ -225,7 +227,8 @@ export const GIS_LAYERS: GisLayer[] = [
         color: '#8BC34A',
         category: 'environment',
         highlightable: true,
-        styleFunction: transparentStyle
+        styleFunction: kemampuanLahanStyle,
+        legendItems: kemampuanLahanLegend
     },
     {
         id: 'kwsn_hutan_new',
@@ -236,6 +239,7 @@ export const GIS_LAYERS: GisLayer[] = [
         color: '#388E3C',
         category: 'environment',
         highlightable: true,
-        styleFunction: transparentStyle
+        styleFunction: skHutanStyle,
+        legendItems: skHutanLegend
     }
 ];

@@ -1,10 +1,11 @@
 // WebGIS Map Viewer Component - v3.0.0 - Enhanced with Basemaps and Dynamic Styling
 import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, GeoJSON, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, useMapEvents, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { GIS_LAYERS, GisLayer } from '@/config/gis_layers';
 import { BASEMAPS } from '@/config/basemaps';
-import { highlightStyle } from '@/config/layerStyles';
+import { highlightStyle, batasDesaHighlightStyle } from '@/config/layerStyles';
+import { findFeaturesAtPoint } from '@/lib/geoUtils';
 import { WebGISNavbar } from './WebGISNavbar';
 import { WebGISSidebar } from './WebGISSidebar';
 import { InfoBar } from './InfoBar';
@@ -26,12 +27,18 @@ L.Marker.prototype.options.icon = DefaultIcon;
 interface MapEventsHandlerProps {
     onMouseMove: (coords: { lat: number; lng: number }) => void;
     onZoomChange: (zoom: number) => void;
+    onMapClick?: (coords: { lat: number; lng: number }) => void;
 }
 
-const MapEventsHandler: React.FC<MapEventsHandlerProps> = ({ onMouseMove, onZoomChange }) => {
+const MapEventsHandler: React.FC<MapEventsHandlerProps> = ({ onMouseMove, onZoomChange, onMapClick }) => {
     const map = useMapEvents({
         mousemove: (e) => {
             onMouseMove({ lat: e.latlng.lat, lng: e.latlng.lng });
+        },
+        click: (e) => {
+            if (onMapClick) {
+                onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+            }
         },
         zoomend: () => {
             onZoomChange(map.getZoom());
@@ -55,7 +62,9 @@ export const MapViewer: React.FC = () => {
     const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
     const [zoom, setZoom] = useState(9);
     const [selectedBasemap, setSelectedBasemap] = useState('osm');
-    const [highlightedFeature, setHighlightedFeature] = useState<{ layerId: string; featureId: any } | null>(null);
+    const [highlightedFeatures, setHighlightedFeatures] = useState<{ layerId: string; featureId: any }[]>([]);
+    const [popupInfo, setPopupInfo] = useState<{ position: { lat: number; lng: number }; content: string } | null>(null);
+    const [hoverInfo, setHoverInfo] = useState<string | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
     const toggleLayer = (id: string) => {
@@ -171,232 +180,397 @@ export const MapViewer: React.FC = () => {
         });
     }, [layers, geoJsonData, loading]);
 
-    const onEachFeature = (layerId: string, layer: GisLayer) => (feature: any, leafletLayer: any) => {
-        if (feature.properties) {
-            const props = feature.properties;
-            let popupContent = '';
 
-            // Helper to generate full attribute table
-            const generateAttributesTable = (properties: any) => {
-                const entries = Object.entries(properties);
-                const tableRows = entries
-                    .filter(([_, value]) => value !== null && value !== undefined)
-                    .map(([key, value]) => `
+    // Helper to generate popup content for a single feature
+    const getPopupContent = (layer: GisLayer, feature: any) => {
+        const props = feature.properties || {};
+        const layerId = layer.id;
+        let popupContent = '';
+
+        // Helper to generate full attribute table
+        const generateAttributesTable = (properties: any) => {
+            if (!properties || Object.keys(properties).length === 0) {
+                return '<div class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 italic">Tidak ada data atribut tambahan.</div>';
+            }
+
+            const entries = Object.entries(properties);
+            // Sort keys alphabetically
+            entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+            const tableRows = entries
+                .map(([key, value]) => {
+                    // Handle potential object/array values by stringifying them for display
+                    let displayValue = value;
+                    if (value === null || value === undefined || value === '') {
+                        displayValue = '-';
+                    } else if (typeof value === 'object') {
+                        displayValue = JSON.stringify(value);
+                    } else {
+                        displayValue = String(value);
+                    }
+
+                    return `
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
+                        <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50 break-words w-1/3">${key}</td>
+                        <td class="p-2 text-xs text-gray-900 break-all">${displayValue}</td>
+                    </tr>
+                `;
+                }).join('');
+
+            if (!tableRows) {
+                return '<div class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 italic">Data atribut kosong.</div>';
+            }
+
+            return `
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="font-bold text-xs text-gray-500 mb-2 uppercase tracking-wider">Detail Atribut</h4>
+                    <div class="max-h-[200px] overflow-y-auto border border-gray-200 rounded">
+                        <table class="w-full border-collapse">
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Layer-specific popup content
+        if (layerId === 'bts_desa') {
+            // Batas Desa - Show administrative hierarchy with unified property checks
+            const desa = props.DESA || props.NAMOBJ || props.NAMA_DESA || props.KELURAHAN || props.KAMPUNG || '-';
+            const kecamatan = props.KECAMATAN || props.WADMKC || props.DISTRIK || props.NAMA_KEC || '-';
+            const kabupaten = props.KABUPATEN || props.WADMKK || props.KAB_KOTA || props.NAMA_KAB || '-';
+
+            popupContent = `
+                <div class="min-w-[280px] mb-4">
+                     <div class="bg-orange-50 px-3 py-2 rounded-t-lg border-b border-orange-100 flex items-center justify-between">
+                         <h3 class="font-bold text-sm text-orange-800">${layer.name}</h3>
+                         <span class="text-xs text-orange-700 bg-white px-2 py-0.5 rounded border border-orange-200">Administrasi</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg border border-orange-100 shadow-sm">
+                        <div class="space-y-3">
+                             <div>
+                                <div class="text-xs text-gray-500 font-semibold">DESA / KELURAHAN</div>
+                                <div class="text-lg font-bold text-gray-800">${desa}</div>
+                             </div>
+                             <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <div class="text-xs text-gray-500 font-semibold">KECAMATAN</div>
+                                    <div class="text-sm font-medium text-gray-700">${kecamatan}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500 font-semibold">KABUPATEN</div>
+                                    <div class="text-sm font-medium text-gray-700">${kabupaten}</div>
+                                </div>
+                             </div>
+                        </div>
+                        ${generateAttributesTable(props)}
+                    </div>
+                </div>
+            `;
+        } else if (layerId === 'sk_hutan' || layerId === 'kwsn_hutan_new') {
+            // SK Hutan - Show forest zone with color indicator
+            const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.NAMA || '-';
+            const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.JENIS || '-';
+            const luas = props.LUAS || props.SHAPE_AREA || props.AREA || '-';
+
+            // Determine color based on function
+            let colorClass = 'bg-green-600';
+            const colorBg = 'bg-green-50';
+            if (fungsi.includes('LINDUNG') || fungsi.includes('Lindung')) {
+                colorClass = 'bg-green-800';
+            } else if (fungsi.includes('PRODUKSI TERBATAS')) {
+                colorClass = 'bg-green-400';
+            } else if (fungsi.includes('PRODUKSI')) {
+                colorClass = 'bg-green-500';
+            } else if (fungsi.includes('KONSERVASI')) {
+                colorClass = 'bg-green-900';
+            } else if (fungsi.includes('APL')) {
+                colorClass = 'bg-yellow-400';
+            }
+
+            popupContent = `
+                <div class="min-w-[280px] mb-4">
+                     <div class="${colorBg} px-3 py-2 rounded-t-lg border-b border-green-100 flex items-center justify-between">
+                         <h3 class="font-bold text-sm text-green-800">${layer.name}</h3>
+                         <div class="flex items-center gap-1">
+                             <div class="w-3 h-3 rounded-full ${colorClass}"></div>
+                             <span class="text-xs text-green-700 font-medium">Kawasan Hutan</span>
+                         </div>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg border border-green-100 shadow-sm">
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold">NAMA KAWASAN</div>
+                                <div class="text-sm font-bold text-gray-800">${namaKawasan}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold">FUNGSI</div>
+                                <div class="text-sm font-medium text-gray-800 bg-gray-50 px-2 py-1 rounded inline-block">${fungsi}</div>
+                            </div>
+                             ${luas !== '-' ? `
+                            <div class="text-xs text-gray-500">
+                                Luas: <span class="font-semibold text-gray-700">${luas}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${generateAttributesTable(props)}
+                    </div>
+                </div>
+            `;
+        } else if (layerId === 'dis_banjir') {
+            // Flood Risk - Show risk level with color
+            const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '-';
+            const lokasi = props.LOKASI || props.DESA || props.NAMOBJ || '-';
+
+            let riskColor = 'bg-green-600';
+            let riskBg = 'bg-green-50';
+            let riskText = 'text-green-800';
+
+            if (typeof riskLevel === 'string') {
+                const level = riskLevel.toUpperCase();
+                if (level.includes('SANGAT TINGGI')) {
+                    riskColor = 'bg-red-600';
+                    riskBg = 'bg-red-50';
+                    riskText = 'text-red-800';
+                } else if (level.includes('TINGGI')) {
+                    riskColor = 'bg-orange-600';
+                    riskBg = 'bg-orange-50';
+                    riskText = 'text-orange-800';
+                } else if (level.includes('SEDANG')) {
+                    riskColor = 'bg-yellow-500';
+                    riskBg = 'bg-yellow-50';
+                    riskText = 'text-yellow-800';
+                }
+            }
+
+            popupContent = `
+                 <div class="min-w-[280px] mb-4">
+                     <div class="${riskBg} px-3 py-2 rounded-t-lg border-b border-red-100 flex items-center justify-between">
+                         <h3 class="font-bold text-sm ${riskText}">${layer.name}</h3>
+                         <span class="text-xs bg-white/80 px-2 py-0.5 rounded border border-red-200 ${riskText}">Rawan Bencana</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg border border-red-100 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-lg ${riskColor} flex items-center justify-center shrink-0 text-white font-bold text-lg shadow-sm">
+                                !
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 font-semibold">TINGKAT RESIKO</div>
+                                <div class="text-base font-bold ${riskText}">${riskLevel}</div>
+                            </div>
+                        </div>
+                         ${lokasi !== '-' ? `
+                        <div class="bg-gray-50 p-2 rounded text-sm">
+                            <span class="text-gray-500 text-xs">Lokasi:</span> <span class="font-medium text-gray-800">${lokasi}</span>
+                        </div>
+                        ` : ''}
+                        ${generateAttributesTable(props)}
+                    </div>
+                </div>
+            `;
+        } else if (layerId === 'jln_provinsi' || layerId === 'jln_prov_pbd' || layerId === 'jalan_nasional') {
+            const namaJalan = props.NAMRJL || props.NAMA_JALAN || props.NAMOBJ || '-';
+            const statusJalan = props.STATUS || props.FUNGSI || props.KELAS || '-';
+            const panjang = props.PANJANG || props.LENGTH || props.SHAPE_LEN || '-';
+
+            popupContent = `
+                <div class="min-w-[280px] mb-4">
+                     <div class="bg-gray-800 px-3 py-2 rounded-t-lg flex items-center justify-between">
+                         <h3 class="font-bold text-sm text-white">${layer.name}</h3>
+                         <span class="text-xs text-gray-300 bg-gray-700 px-2 py-0.5 rounded">Infrastruktur</span>
+                    </div>
+                     <div class="p-3 bg-white rounded-b-lg border border-gray-200 shadow-sm">
+                        <div class="space-y-2">
+                             <div>
+                                <div class="text-xs text-gray-500 font-semibold">NAMA JALAN</div>
+                                <div class="text-sm font-bold text-gray-800">${namaJalan}</div>
+                             </div>
+                             <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <div class="text-xs text-gray-500 font-semibold">STATUS</div>
+                                    <div class="text-sm font-medium text-gray-700">${statusJalan}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500 font-semibold">PANJANG</div>
+                                    <div class="text-sm font-medium text-gray-700">${panjang}</div>
+                                </div>
+                             </div>
+                        </div>
+                        ${generateAttributesTable(props)}
+                     </div>
+                </div>
+            `;
+        } else if (layerId === 'kemampuan_lahan_pbd') {
+            const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || '-';
+            const keterangan = props.KETERANGAN || props.ARAHAN || '-';
+
+            popupContent = `
+                 <div class="min-w-[280px] mb-4">
+                      <div class="bg-lime-50 px-3 py-2 rounded-t-lg border-b border-lime-100 flex items-center justify-between">
+                         <h3 class="font-bold text-sm text-lime-800">${layer.name}</h3>
+                         <span class="text-xs text-lime-700 bg-white px-2 py-0.5 rounded border border-lime-200">Lingkungan</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg border border-lime-100 shadow-sm">
+                        <div class="mb-3">
+                             <div class="text-xs text-gray-500 font-semibold mb-1">KELAS KEMAMPUAN</div>
+                             <div class="text-lg font-bold text-lime-800">${kelas}</div>
+                        </div>
+                        ${keterangan !== '-' ? `
+                        <div class="bg-lime-50/50 p-2 rounded text-sm text-gray-700 mb-2 italic">
+                            "${keterangan}"
+                        </div>
+                        ` : ''}
+                        ${generateAttributesTable(props)}
+                    </div>
+                 </div>
+             `;
+        } else {
+            const entries = Object.entries(props);
+            const tableRows = entries
+                .filter(([_, value]) => value !== null && value !== undefined)
+                .map(([key, value]) => `
                         <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
                             <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50 break-words w-1/3">${key}</td>
                             <td class="p-2 text-xs text-gray-900 break-all">${value}</td>
                         </tr>
                     `).join('');
 
-                return `
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <h4 class="font-bold text-xs text-gray-500 mb-2 uppercase tracking-wider">Detail Atribut</h4>
-                        <div class="max-h-[200px] overflow-y-auto border border-gray-200 rounded">
+            popupContent = `
+                <div class="min-w-[280px] mb-4">
+                    <div class="bg-gray-50 px-3 py-2 rounded-t-lg border-b border-gray-200">
+                        <h3 class="font-bold text-sm text-gray-700">${layer.name}</h3>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg border border-gray-200 shadow-sm">
+                         <div class="max-h-[200px] overflow-y-auto">
                             <table class="w-full border-collapse">
                                 <tbody>${tableRows}</tbody>
                             </table>
                         </div>
                     </div>
-                `;
-            };
+                </div>
+             `;
+        }
 
-            // Layer-specific popup content
-            if (layerId === 'bts_desa') {
-                // Batas Desa - Show administrative hierarchy
-                const kelurahan = props.DESA || props.NAMOBJ || props.NAMA_DESA || props.KELURAHAN || props.KAMPUNG || '-';
-                const distrik = props.KECAMATAN || props.DISTRIK || props.NAMA_KEC || '-';
-                const kabupaten = props.KABUPATEN || props.KAB_KOTA || props.NAMA_KAB || '-';
+        return popupContent;
+    };
 
-                popupContent = `
-                    <div class="min-w-[280px]">
-                        <h3 class="font-bold text-base mb-3 text-teal-700 border-b-2 border-teal-700 pb-2">Informasi Wilayah Administratif</h3>
-                        <div class="space-y-2">
-                            <div class="bg-teal-50 p-3 rounded-lg border-l-4 border-teal-600">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">KELURAHAN/KAMPUNG</div>
-                                <div class="text-base font-bold text-teal-800">${kelurahan}</div>
-                            </div>
-                            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-600">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">DISTRIK</div>
-                                <div class="text-sm font-bold text-blue-800">${distrik}</div>
-                            </div>
-                            <div class="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-600">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">KABUPATEN</div>
-                                <div class="text-sm font-bold text-purple-800">${kabupaten}</div>
-                            </div>
-                        </div>
-                        ${generateAttributesTable(props)}
-                    </div>
-                `;
-            } else if (layerId === 'sk_hutan') {
-                // SK Hutan - Show forest zone with color indicator
-                const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.NAMA || '-';
-                const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.JENIS || '-';
-                const luas = props.LUAS || props.SHAPE_AREA || props.AREA || '-';
+    const handleMapClick = (coords: { lat: number, lng: number }) => {
+        // Find all features at the clicked point
+        const features = findFeaturesAtPoint(coords, layers, geoJsonData);
 
-                // Determine color based on function
-                let colorClass = 'bg-green-600';
-                let colorBg = 'bg-green-50';
-                if (fungsi.includes('LINDUNG') || fungsi.includes('Lindung')) {
-                    colorClass = 'bg-green-800';
-                    colorBg = 'bg-green-50';
-                } else if (fungsi.includes('PRODUKSI TERBATAS')) {
-                    colorClass = 'bg-green-400';
-                    colorBg = 'bg-green-50';
-                } else if (fungsi.includes('PRODUKSI')) {
-                    colorClass = 'bg-green-500';
-                    colorBg = 'bg-green-50';
-                } else if (fungsi.includes('KONSERVASI')) {
-                    colorClass = 'bg-green-900';
-                    colorBg = 'bg-green-50';
-                } else if (fungsi.includes('APL')) {
-                    colorClass = 'bg-yellow-400';
-                    colorBg = 'bg-yellow-50';
+        if (features.length > 0) {
+            console.log(`Found ${features.length} features at click`, coords);
+
+            // Generate content for all found features
+            const contentParts = features.map(({ layer, feature }) => getPopupContent(layer, feature));
+
+            // Join with some spacing
+            const combinedContent = contentParts.join('');
+
+            // Wrap in a container
+            const finalContent = `<div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 -mr-2">${combinedContent}</div>`;
+
+            setPopupInfo({
+                position: coords,
+                content: finalContent
+            });
+
+            // Highlight ALL found features
+            setHighlightedFeatures(features.map(({ layer, feature }) => ({
+                layerId: layer.id,
+                featureId: feature.id || feature.properties?.id || Math.random() // Fallback if no ID
+            })));
+        } else {
+            setPopupInfo(null);
+            setHighlightedFeatures([]);
+        }
+    };
+
+    const onEachFeature = (layerId: string, layer: GisLayer) => (feature: any, leafletLayer: any) => {
+        if (feature.properties) {
+            // Attach click handler to ALL features to ensure we catch the click
+            leafletLayer.on('click', (e: any) => {
+                // Prevent map click from firing (which would just duplicate this check)
+                L.DomEvent.stopPropagation(e);
+
+                // Trigger the unified lookup using the click coordinates
+                handleMapClick(e.latlng);
+            });
+
+            // Hover effects for InfoBar
+            leafletLayer.on('mouseover', (e: any) => {
+                const props = feature.properties;
+                // Determine best label based on layer type
+                let label = '';
+                if (layerId === 'bts_desa') {
+                    label = `Desa: ${props.NAMOBJ || props.DESA || props.NAMA_DESA || '-'}`;
+                } else if (layerId.includes('hutan')) {
+                    label = `${layer.name}: ${props.NAMOBJ || props.FUNGSI || '-'}`;
+                } else if (layerId.includes('resiko')) {
+                    label = `${layer.name}: ${props.RESIKO || props.NAMOBJ || '-'}`;
+                } else {
+                    label = props.NAMOBJ || props.NAMA || props.RESIKO || layer.name;
                 }
 
-                popupContent = `
-                    <div class="min-w-[280px]">
-                        <h3 class="font-bold text-base mb-3 text-green-700 border-b-2 border-green-700 pb-2">SK Kawasan Hutan</h3>
-                        <div class="space-y-2">
-                            <div class="${colorBg} p-3 rounded-lg border-l-4 ${colorClass}">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">NAMA KAWASAN</div>
-                                <div class="text-base font-bold text-gray-800">${namaKawasan}</div>
-                            </div>
-                            <div class="${colorBg} p-3 rounded-lg">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <div class="w-4 h-4 rounded ${colorClass}"></div>
-                                    <div class="text-xs text-gray-600 font-semibold">FUNGSI KAWASAN</div>
-                                </div>
-                                <div class="text-sm font-bold text-gray-800">${fungsi}</div>
-                            </div>
-                            ${luas !== '-' ? `
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="text-xs text-gray-600">Luas: <span class="font-semibold">${luas}</span></div>
-                            </div>
-                            ` : ''}
-                        </div>
-                        ${generateAttributesTable(props)}
-                    </div>
-                `;
-            } else if (layerId === 'dis_banjir') {
-                // Flood Risk - Show risk level with color
-                const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '-';
-                const lokasi = props.LOKASI || props.DESA || props.NAMOBJ || '-';
+                setHoverInfo(label);
 
-                let riskColor = 'bg-green-600';
-                let riskBg = 'bg-green-50';
-                let riskText = 'text-green-800';
-
-                if (typeof riskLevel === 'string') {
-                    const level = riskLevel.toUpperCase();
-                    if (level.includes('SANGAT TINGGI')) {
-                        riskColor = 'bg-red-900';
-                        riskBg = 'bg-red-50';
-                        riskText = 'text-red-900';
-                    } else if (level.includes('TINGGI')) {
-                        riskColor = 'bg-red-600';
-                        riskBg = 'bg-red-50';
-                        riskText = 'text-red-800';
-                    } else if (level.includes('SEDANG')) {
-                        riskColor = 'bg-yellow-500';
-                        riskBg = 'bg-yellow-50';
-                        riskText = 'text-yellow-800';
-                    }
+                // Optional: Highlight on hover if not already selected
+                if (layer.highlightable) {
+                    leafletLayer.setStyle({ weight: (layer.styleFunction ? 3 : 4), fillOpacity: 0.2 });
                 }
+            });
 
-                popupContent = `
-                    <div class="min-w-[280px]">
-                        <h3 class="font-bold text-base mb-3 text-orange-700 border-b-2 border-orange-700 pb-2">Daerah Rawan Banjir</h3>
-                        <div class="space-y-2">
-                            <div class="${riskBg} p-3 rounded-lg border-l-4 ${riskColor}">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <div class="w-4 h-4 rounded ${riskColor}"></div>
-                                    <div class="text-xs text-gray-600 font-semibold">TINGKAT RESIKO</div>
-                                </div>
-                                <div class="text-base font-bold ${riskText}">${riskLevel}</div>
-                            </div>
-                            ${lokasi !== '-' ? `
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">LOKASI</div>
-                                <div class="text-sm font-semibold text-gray-800">${lokasi}</div>
-                            </div>
-                            ` : ''}
-                        </div>
-                        ${generateAttributesTable(props)}
-                    </div>
-                `;
-            } else if (layerId === 'jln_provinsi') {
-                // Roads - Show road information
-                const namaJalan = props.NAMRJL || props.NAMA_JALAN || props.NAMOBJ || '-';
-                const statusJalan = props.STATUS || props.FUNGSI || props.KELAS || '-';
-                const panjang = props.PANJANG || props.LENGTH || props.SHAPE_LEN || '-';
-
-                popupContent = `
-                    <div class="min-w-[280px]">
-                        <h3 class="font-bold text-base mb-3 text-red-700 border-b-2 border-red-700 pb-2">Jalan Provinsi</h3>
-                        <div class="space-y-2">
-                            <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-600">
-                                <div class="text-xs text-gray-600 font-semibold mb-1">NAMA JALAN</div>
-                                <div class="text-base font-bold text-red-800">${namaJalan}</div>
-                            </div>
-                            ${statusJalan !== '-' ? `
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="text-xs text-gray-600">Status: <span class="font-semibold">${statusJalan}</span></div>
-                            </div>
-                            ` : ''}
-                            ${panjang !== '-' ? `
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="text-xs text-gray-600">Panjang: <span class="font-semibold">${panjang}</span></div>
-                            </div>
-                            ` : ''}
-                        </div>
-                        ${generateAttributesTable(props)}
-                    </div>
-                `;
-            } else {
-                // Default popup for other layers
-                const entries = Object.entries(props);
-                const tableRows = entries
-                    .filter(([_, value]) => value !== null && value !== undefined)
-                    .map(([key, value]) => `
-                        <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
-                            <td class="font-semibold p-2 text-xs text-gray-700 bg-gray-50 break-words w-1/3">${key}</td>
-                            <td class="p-2 text-xs text-gray-900 break-all">${value}</td>
-                        </tr>
-                    `).join('');
-
-                popupContent = `
-                    <div class="min-w-[250px] max-h-[400px] overflow-y-auto">
-                        <h3 class="font-bold text-sm mb-2 text-teal-700 border-b pb-1 overflow-hidden text-ellipsis whitespace-nowrap" title="${layer.name}">${layer.name}</h3>
-                        <table class="w-full border-collapse">
-                            <tbody>${tableRows}</tbody>
-                        </table>
-                    </div>
-                `;
-            }
-
-            leafletLayer.bindPopup(popupContent, { maxWidth: 400 });
-
-            // Add click handler for highlighting
-            if (layer.highlightable) {
-                leafletLayer.on('click', () => {
-                    setHighlightedFeature({
-                        layerId: layerId,
-                        featureId: feature.id || feature.properties.id || Math.random()
+            leafletLayer.on('mouseout', (e: any) => {
+                setHoverInfo(null);
+                // Reset style triggers re-render via state usually, but for simple hover we can just let react-leaflet handle it 
+                // or ideally we rely on the declared style function.
+                // Resetting style directly on leafet layer is tricky without full state reset.
+                // For now, let's just clear the text.
+                // To properly reset style we would need to re-apply the original style.
+                if (layer.highlightable) {
+                    // Re-apply original style logic basically
+                    const opacity = (layerOpacity[layerId] || 100) / 100;
+                    // This is a bit hacky, better to let React handle it, but for performance:
+                    leafletLayer.setStyle({
+                        weight: layerId === 'bts_desa' ? 4 : (layerId.includes('kontur') ? 1 : 2),
+                        fillOpacity: (layerId === 'bts_desa' || layerId.includes('kontur')) ? 0 : 0.3 * opacity
                     });
-                });
-            }
+                }
+            });
         }
     };
 
     // Get style for a feature
     const getFeatureStyle = (layer: GisLayer, feature: any) => {
         const opacity = (layerOpacity[layer.id] || 100) / 100;
-        const isHighlighted = highlightedFeature?.layerId === layer.id &&
-            (highlightedFeature?.featureId === feature.id ||
-                highlightedFeature?.featureId === feature.properties?.id);
+        const isHighlighted = highlightedFeatures.some(h =>
+            h.layerId === layer.id &&
+            (h.featureId === feature.id || h.featureId === feature.properties?.id)
+        );
 
         // If highlighted, use highlight style
         if (isHighlighted) {
+            if (layer.id === 'bts_desa') {
+                return batasDesaHighlightStyle;
+            } else if (layer.id === 'dis_banjir' || layer.category === 'risk') {
+                // Use the new glowing style for risk layers
+                // Need to import it first, but since we are replacing logic inside the component, 
+                // we assume it is/will be available. 
+                // Wait, I need to make sure floodRiskHighlightStyle is imported.
+                // Since I cannot change imports easily with this tool without multiple chunks,
+                // I will use properties directly if imports are missing, or rely on the fact that I will add it to imports.
+                // Let's check imports in next step or assume it works if I map it correctly.
+                // Actually, let's just use the style object directly here to be safe if I can't check imports easily right now.
+                // Or better, I'll update imports in a separate step if needed.
+                // For now, I'll return the object literal matching what I defined in layerStyles.
+                return {
+                    weight: 4,
+                    color: '#00FFFF', // Cyan
+                    opacity: 1,
+                    fillOpacity: 0.9,
+                    dashArray: '10, 5'
+                };
+            }
             return highlightStyle;
         }
 
@@ -445,7 +619,20 @@ export const MapViewer: React.FC = () => {
                     <MapEventsHandler
                         onMouseMove={setCoordinates}
                         onZoomChange={setZoom}
+                        onMapClick={handleMapClick}
                     />
+
+                    {popupInfo && (
+                        <Popup
+                            position={popupInfo.position}
+                            eventHandlers={{
+                                remove: () => setPopupInfo(null)
+                            }}
+                            maxWidth={400}
+                        >
+                            <div dangerouslySetInnerHTML={{ __html: popupInfo.content }} />
+                        </Popup>
+                    )}
 
                     {/* Zoom Control */}
                     <div className="leaflet-top leaflet-left">
@@ -460,7 +647,7 @@ export const MapViewer: React.FC = () => {
 
                         return (
                             <GeoJSON
-                                key={`${layer.id}-${highlightedFeature?.featureId || 'none'}`}
+                                key={`${layer.id}-${highlightedFeatures.length > 0 ? 'highlighted' : 'none'}`}
                                 data={geoJsonData[layer.id]}
                                 style={(feature) => getFeatureStyle(layer, feature)}
                                 onEachFeature={onEachFeature(layer.id, layer)}
@@ -489,7 +676,7 @@ export const MapViewer: React.FC = () => {
                 )}
             </div>
 
-            <InfoBar coordinates={coordinates} zoom={zoom} />
+            <InfoBar coordinates={coordinates} zoom={zoom} hoverInfo={hoverInfo} />
         </div>
     );
 };

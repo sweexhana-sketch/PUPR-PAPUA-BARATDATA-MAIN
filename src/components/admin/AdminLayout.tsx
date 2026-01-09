@@ -10,7 +10,8 @@ import {
     Phone,
     LogOut,
     Menu,
-    X
+    X,
+    FileText
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -24,6 +25,7 @@ const AdminLayout = () => {
         { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { path: "/admin/berita", label: "Berita", icon: Newspaper },
         { path: "/admin/galeri", label: "Galeri", icon: ImageIcon },
+        { path: "/admin/sop", label: "SOP", icon: FileText },
         { path: "/admin/profil", label: "Profil", icon: User },
         { path: "/admin/hero", label: "Beranda (Hero)", icon: Home },
         { path: "/admin/kontak", label: "Kontak", icon: Phone },
@@ -45,8 +47,8 @@ const AdminLayout = () => {
                             to={item.path}
                             onClick={() => setIsOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                    ? "bg-primary text-primary-foreground"
-                                    : "hover:bg-secondary text-foreground"
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-secondary text-foreground"
                                 }`}
                         >
                             <Icon className="w-5 h-5" />

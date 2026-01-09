@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getGallery } from "@/lib/storage";
+import { getGallery, getSOP } from "@/lib/storage";
 import { X, ZoomIn, FolderArchive, Download, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -25,14 +25,18 @@ const Galeri = () => {
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const portalItems = [
-        { id: 1, title: "SOP Bidang Sumber Daya Air", file: "#", size: "15 MB", code: "SOP-SDA-001" },
-        { id: 2, title: "SOP Bidang Bina Marga", file: "#", size: "20 MB", code: "SOP-BM-001" },
-        { id: 3, title: "SOP Bidang Cipta Karya", file: "#", size: "18 MB", code: "SOP-CK-001" },
-        { id: 4, title: "SOP Bidang Perumahan", file: "#", size: "12 MB", code: "SOP-PR-001" },
-        { id: 5, title: "SOP Bina Konstruksi", file: "#", size: "10 MB", code: "SOP-BK-001" },
-        { id: 6, title: "SOP Sekretariat", file: "#", size: "8 MB", code: "SOP-SEK-001" },
-    ];
+    const [portalItems, setPortalItems] = useState<any[]>([]);
+
+    useEffect(() => {
+        setPortalItems(getSOP());
+
+        const handleStorageUpdate = () => {
+            setPortalItems(getSOP());
+        };
+
+        window.addEventListener("storage-update", handleStorageUpdate);
+        return () => window.removeEventListener("storage-update", handleStorageUpdate);
+    }, []);
 
     return (
         <div className="min-h-screen bg-background">
@@ -145,7 +149,7 @@ const Galeri = () => {
 
                                         <a
                                             href={item.file}
-                                            // download 
+                                            download
                                             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium"
                                         >
                                             <Download className="h-4 w-4" />
@@ -153,6 +157,8 @@ const Galeri = () => {
                                         </a>
                                     </div>
                                 ))}
+
+
                             </div>
                         </TabsContent>
                     </Tabs>

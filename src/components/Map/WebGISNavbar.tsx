@@ -12,6 +12,11 @@ export const WebGISNavbar: React.FC<WebGISNavbarProps> = ({ onFullscreenToggle }
                 {/* Logo and Title */}
                 <div className="flex items-center gap-3">
                     <img
+                        src="/images/logo-papua-barat-daya.png"
+                        alt="Logo Papua Barat Daya"
+                        className="h-14 w-auto"
+                    />
+                    <img
                         src="/images/logo-pupr-pbd.png"
                         alt="Logo PUPR Papua Barat Daya"
                         className="h-14 w-auto"

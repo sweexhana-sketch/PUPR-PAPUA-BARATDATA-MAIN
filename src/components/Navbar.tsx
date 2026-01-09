@@ -16,7 +16,7 @@ const Navbar = () => {
     { name: "Galeri", path: "/galeri" },
     { name: "Kontak", path: "/kontak" },
     { name: "Web GIS", path: "/webgis" },
-    { name: "SIGAP", path: "http://localhost:8080/login", external: true },
+    { name: "SIGAP", path: "https://aplikasi-sigap-dpupr-pbd.vercel.app/login", external: true },
   ];
 
   const isActive = (path: string) => location.pathname === path;

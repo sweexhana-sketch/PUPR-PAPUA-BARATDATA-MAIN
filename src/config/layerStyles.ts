@@ -7,30 +7,60 @@ export interface LegendItem {
 }
 
 // SK Hutan (Forest Decree) styling
+// Helper to generate a consistent color from a string
+const stringToColor = (str: string): string => {
+    if (!str) return '#2E7D32'; // Default green
+
+    // Palette of distinct colors suitable for maps
+    const palette = [
+        '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
+        '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe',
+        '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000',
+        '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080',
+        '#E65100', '#1B5E20', '#0D47A1', '#FF6F00', '#006064'
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return palette[Math.abs(hash) % palette.length];
+};
+
+// SK Hutan (Forest Decree) styling
 export const skHutanStyle = (feature: any): PathOptions => {
     const props = feature?.properties || {};
-    const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.NAMOBJ || '';
+    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.NAMA || '';
+    const fungsi = props.FUNGSI_KWS || props.FUNGSI || '';
 
-    let color = '#2E7D32'; // Default: dark green
+    // If we have a specific area name, use it to generate a unique color
+    // This satisfies the request to "bedakan nama kawasan masing2"
+    let color: string;
 
-    // Color mapping based on forest function
-    if (fungsi.includes('LINDUNG') || fungsi.includes('Lindung')) {
-        color = '#2E7D32'; // Dark green - Protected Forest
-    } else if (fungsi.includes('PRODUKSI TERBATAS') || fungsi.includes('Produksi Terbatas')) {
-        color = '#81C784'; // Light green - Limited Production Forest
-    } else if (fungsi.includes('PRODUKSI') || fungsi.includes('Produksi')) {
-        color = '#66BB6A'; // Medium green - Production Forest
-    } else if (fungsi.includes('KONSERVASI') || fungsi.includes('Konservasi')) {
-        color = '#1B5E20'; // Very dark green - Conservation Forest
-    } else if (fungsi.includes('APL') || fungsi.includes('PENGGUNAAN LAIN')) {
-        color = '#FFF9C4'; // Light yellow - Other Use Area
+    if (namaKawasan && namaKawasan !== '-') {
+        color = stringToColor(namaKawasan);
+    } else {
+        // Fallback to function-based coloring if no name
+        color = '#2E7D32'; // Default: dark green
+        if (fungsi.includes('LINDUNG') || fungsi.includes('Lindung')) {
+            color = '#2E7D32';
+        } else if (fungsi.includes('PRODUKSI TERBATAS') || fungsi.includes('Produksi Terbatas')) {
+            color = '#81C784';
+        } else if (fungsi.includes('PRODUKSI') || fungsi.includes('Produksi')) {
+            color = '#66BB6A';
+        } else if (fungsi.includes('KONSERVASI') || fungsi.includes('Konservasi')) {
+            color = '#1B5E20';
+        } else if (fungsi.includes('APL') || fungsi.includes('PENGGUNAAN LAIN')) {
+            color = '#FFF9C4';
+        }
     }
 
     return {
         color: color,
         weight: 2,
         opacity: 0.8,
-        fillOpacity: 0 // Transparent fill as requested
+        fillOpacity: 0.5 // Increased opacity to show the color differentiation
     };
 };
 
@@ -49,39 +79,45 @@ export const floodRiskStyle = (feature: any): PathOptions => {
     const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '';
     const riskValue = props.NILAI || props.VALUE || 0;
 
-    let color = '#4CAF50'; // Default: green (low risk)
+    let color = '#00C853'; // Default: Green (Low Risk)
 
-    // Color mapping based on risk level
     if (typeof riskLevel === 'string') {
         const level = riskLevel.toUpperCase();
         if (level.includes('SANGAT TINGGI') || level.includes('VERY HIGH')) {
-            color = '#B71C1C'; // Dark red
+            color = '#D50000'; // Red
         } else if (level.includes('TINGGI') || level.includes('HIGH')) {
-            color = '#F44336'; // Red
+            color = '#D50000'; // Red
         } else if (level.includes('SEDANG') || level.includes('MEDIUM') || level.includes('MODERATE')) {
-            color = '#FFC107'; // Yellow/Orange
+            color = '#FFD600'; // Yellow
         } else if (level.includes('RENDAH') || level.includes('LOW')) {
-            color = '#4CAF50'; // Green
+            color = '#00C853'; // Green
         }
     } else if (typeof riskValue === 'number') {
         // Numeric risk value (assuming 1-4 scale)
-        if (riskValue >= 4) {
-            color = '#B71C1C'; // Very high
-        } else if (riskValue >= 3) {
-            color = '#F44336'; // High
+        if (riskValue >= 3) {
+            color = '#D50000'; // High
         } else if (riskValue >= 2) {
-            color = '#FFC107'; // Medium
+            color = '#FFD600'; // Medium
         } else {
-            color = '#4CAF50'; // Low
+            color = '#00C853'; // Low
         }
     }
 
     return {
         color: color,
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.5
+        weight: 1,
+        opacity: 0.9,
+        fillOpacity: 0.7
     };
+};
+
+// Highlight style specifically for Flood Risk (Glowing effect)
+export const floodRiskHighlightStyle: PathOptions = {
+    weight: 4,
+    color: '#00FFFF', // Cyan neon glow
+    opacity: 1,
+    fillOpacity: 0.9, // Very bright fill
+    dashArray: '10, 5' // Dashed line for "active" look
 };
 
 export const floodRiskLegend: LegendItem[] = [
@@ -134,11 +170,12 @@ export const contourLegend: LegendItem[] = [
 ];
 
 // Highlight style for clicked features
+// Highlight style for clicked features
 export const highlightStyle: PathOptions = {
-    weight: 5,
-    color: '#00FFFF',
+    weight: 6,
+    color: '#00FFFF', // Cyan for "glowing" effect
     opacity: 1,
-    fillOpacity: 0.7
+    fillOpacity: 0.6 // Slightly lower fill opacity to blend
 };
 
 // Transparent style for polygon layers that need to show background
@@ -167,3 +204,132 @@ export const transparentFloodRiskStyle = (feature: any): PathOptions => {
     };
 };
 
+
+// Land Capability styling
+export const kemampuanLahanStyle = (feature: any): PathOptions => {
+    const props = feature?.properties || {};
+    const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || props.KETERANGAN || '';
+
+    let color = '#8BC34A'; // Default: light green
+
+    // Color mapping based on capability class
+    // If specific name present, use that for distinct color
+    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || '';
+
+    if (namaKawasan && namaKawasan !== '-') {
+        color = stringToColor(namaKawasan);
+    } else if (kelas.includes('VIII') || kelas.includes('8')) {
+        color = '#B71C1C'; // Red - Very limited
+    } else if (kelas.includes('VII') || kelas.includes('7')) {
+        color = '#E65100'; // Orange - Severe limitations
+    } else if (kelas.includes('VI') || kelas.includes('6')) {
+        color = '#FF9800'; // Deep Orange - Moderate/Severe
+    } else if (kelas.includes('V') || kelas.includes('5')) {
+        color = '#FFC107'; // Amber - Moderate
+    } else if (kelas.includes('IV') || kelas.includes('4')) {
+        color = '#FFEB3B'; // Yellow - Moderate/Good
+    } else if (kelas.includes('III') || kelas.includes('3')) {
+        color = '#CDDC39'; // Lime - Good
+    } else if (kelas.includes('II') || kelas.includes('2')) {
+        color = '#8BC34A'; // Light Green - Very Good
+    } else if (kelas.includes('I') || kelas.includes(' 1') || kelas === 'I') {
+        color = '#4CAF50'; // Green - Excellent
+    }
+
+    return {
+        color: color,
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.6
+    };
+};
+
+export const kemampuanLahanLegend: LegendItem[] = [
+    { color: '#4CAF50', label: 'Kelas I - Sangat Baik' },
+    { color: '#8BC34A', label: 'Kelas II - Baik' },
+    { color: '#CDDC39', label: 'Kelas III - Sedang' },
+    { color: '#FFEB3B', label: 'Kelas IV - Terbatas' },
+    { color: '#FFC107', label: 'Kelas V - Agak Buruk' },
+    { color: '#FF9800', label: 'Kelas VI - Buruk' },
+    { color: '#E65100', label: 'Kelas VII - Sangat Buruk' },
+    { color: '#B71C1C', label: 'Kelas VIII - Ekstrim' }
+];
+
+// Landslide Risk styling
+export const longsorRiskStyle = (feature: any): PathOptions => {
+    const props = feature?.properties || {};
+    const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || props.NAMOBJ || '';
+
+    let color = '#795548'; // Default: Brown
+
+    if (typeof riskLevel === 'string') {
+        const level = riskLevel.toUpperCase();
+        if (level.includes('SANGAT TINGGI') || level.includes('VERY HIGH')) {
+            color = '#B71C1C'; // Dark red
+        } else if (level.includes('TINGGI') || level.includes('HIGH')) {
+            color = '#D32F2F'; // Red
+        } else if (level.includes('SEDANG') || level.includes('MEDIUM')) {
+            color = '#F57C00'; // Orange
+        } else if (level.includes('RENDAH') || level.includes('LOW')) {
+            color = '#8BC34A'; // Light Green
+        }
+    }
+
+    return {
+        color: color,
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.6
+    };
+};
+
+export const longsorRiskLegend: LegendItem[] = [
+    { color: '#8BC34A', label: 'Resiko Rendah' },
+    { color: '#F57C00', label: 'Resiko Sedang' },
+    { color: '#D32F2F', label: 'Resiko Tinggi' },
+    { color: '#B71C1C', label: 'Resiko Sangat Tinggi' }
+];
+
+// Flash Flood (Banjir Bandang) Risk styling
+export const banjirBandangRiskStyle = (feature: any): PathOptions => {
+    const props = feature?.properties || {};
+    const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || props.NAMOBJ || '';
+
+    let color = '#0D47A1'; // Default: Blue
+
+    if (typeof riskLevel === 'string') {
+        const level = riskLevel.toUpperCase();
+        if (level.includes('SANGAT TINGGI') || level.includes('VERY HIGH')) {
+            color = '#B71C1C'; // Dark red
+        } else if (level.includes('TINGGI') || level.includes('HIGH')) {
+            color = '#C62828'; // Red
+        } else if (level.includes('SEDANG') || level.includes('MEDIUM')) {
+            color = '#F9A825'; // Yellow Dark
+        } else if (level.includes('RENDAH') || level.includes('LOW')) {
+            color = '#2E7D32'; // Green
+        }
+    }
+
+    return {
+        color: color,
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.6
+    };
+};
+
+export const banjirBandangRiskLegend: LegendItem[] = [
+    { color: '#2E7D32', label: 'Resiko Rendah' },
+    { color: '#F9A825', label: 'Resiko Sedang' },
+    { color: '#C62828', label: 'Resiko Tinggi' },
+    { color: '#B71C1C', label: 'Resiko Sangat Tinggi' }
+];
+
+// Highlight style for Batas Desa (Glowing Outline)
+export const batasDesaHighlightStyle: PathOptions = {
+    weight: 4,
+    color: '#00FFFF', // Cyan / Electric Blue
+    opacity: 1,
+    fillOpacity: 0.5, // Semi-transparent fill for "light up" effect
+    dashArray: '10, 5' // Dashed line for active look
+};

@@ -18,6 +18,7 @@ import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import ManageNews from "./pages/admin/ManageNews";
 import ManageGallery from "./pages/admin/ManageGallery";
+import ManageSOP from "./pages/admin/ManageSOP";
 import ManageProfile from "./pages/admin/ManageProfile";
 import ManageHero from "./pages/admin/ManageHero";
 import ManageContact from "./pages/admin/ManageContact";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="berita" element={<ManageNews />} />
               <Route path="galeri" element={<ManageGallery />} />
+              <Route path="sop" element={<ManageSOP />} />
               <Route path="profil" element={<ManageProfile />} />
               <Route path="hero" element={<ManageHero />} />
               <Route path="kontak" element={<ManageContact />} />

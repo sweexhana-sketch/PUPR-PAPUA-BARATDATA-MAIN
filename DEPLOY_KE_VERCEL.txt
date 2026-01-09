@@ -1,0 +1,199 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║  PANDUAN DEPLOY WEBGIS KE VERCEL (ONLINE)                       ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+MENGAPA DEPLOY KE VERCEL?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Website bisa diakses dari mana saja (tidak perlu npm run dev)
+✓ Gratis untuk project seperti ini
+✓ Otomatis dapat SSL certificate (HTTPS)
+✓ Bisa pakai custom domain
+✓ Otomatis update setiap kali ada perubahan kode
+
+
+PERSIAPAN YANG DIBUTUHKAN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Akun GitHub (gratis) - untuk simpan kode
+2. Akun Vercel (gratis) - untuk hosting
+3. Git terinstall di komputer
+
+
+CARA 1: DEPLOY OTOMATIS VIA GITHUB (PALING MUDAH)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LANGKAH 1: BUAT AKUN GITHUB
+──────────────────────────────────────────────────────────────────
+1. Buka: https://github.com/signup
+2. Daftar dengan email
+3. Verifikasi email
+4. Login ke GitHub
+
+
+LANGKAH 2: UPLOAD KODE KE GITHUB
+──────────────────────────────────────────────────────────────────
+A. Install Git (jika belum):
+   - Download: https://git-scm.com/download/win
+   - Install dengan klik Next-Next-Finish
+
+B. Setup Git (pertama kali):
+   - Buka CMD/Terminal di folder project
+   - Ketik:
+     git config --global user.name "Nama Anda"
+     git config --global user.email "email@anda.com"
+
+C. Upload ke GitHub:
+   1. Di GitHub, klik tombol "+" → "New repository"
+   2. Nama repository: pupr-webgis (atau nama lain)
+   3. Pilih "Public" atau "Private"
+   4. JANGAN centang "Initialize with README"
+   5. Klik "Create repository"
+
+   6. Di CMD/Terminal folder project, ketik:
+      git init
+      git add .
+      git commit -m "Initial commit"
+      git branch -M main
+      git remote add origin https://github.com/USERNAME/pupr-webgis.git
+      git push -u origin main
+
+   (Ganti USERNAME dengan username GitHub Anda)
+
+
+LANGKAH 3: DEPLOY KE VERCEL
+──────────────────────────────────────────────────────────────────
+1. Buka: https://vercel.com/signup
+2. Klik "Continue with GitHub"
+3. Login dengan akun GitHub Anda
+4. Authorize Vercel
+
+5. Di Vercel Dashboard:
+   - Klik "Add New..." → "Project"
+   - Pilih repository "pupr-webgis"
+   - Klik "Import"
+
+6. Konfigurasi:
+   - Framework Preset: Vite (auto-detect)
+   - Root Directory: ./
+   - Build Command: npm run build
+   - Output Directory: dist
+   - Install Command: npm install
+
+7. Environment Variables (PENTING!):
+   Klik "Environment Variables"
+   Tambahkan:
+   - VITE_SUPABASE_URL = (URL Supabase Anda)
+   - VITE_SUPABASE_ANON_KEY = (Key Supabase Anda)
+
+8. Klik "Deploy"
+
+9. Tunggu 2-5 menit sampai selesai
+
+10. Setelah selesai, Anda akan dapat URL seperti:
+    https://pupr-webgis.vercel.app
+
+
+LANGKAH 4: AKSES WEBGIS ONLINE
+──────────────────────────────────────────────────────────────────
+Buka browser, ketik URL yang diberikan Vercel:
+https://pupr-webgis.vercel.app/webgis
+
+✓ Website sudah online!
+✓ Bisa diakses dari mana saja
+✓ Tidak perlu npm run dev lagi
+
+
+CARA 2: DEPLOY MANUAL VIA VERCEL CLI (ADVANCED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Install Vercel CLI:
+   npm install -g vercel
+
+2. Login:
+   vercel login
+
+3. Deploy:
+   vercel --prod
+
+4. Ikuti prompts yang muncul
+
+
+CUSTOM DOMAIN (OPSIONAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Jika ingin pakai domain sendiri (contoh: webgis.papuabaratdaya.app):
+
+1. Di Vercel Dashboard:
+   - Buka project
+   - Settings → Domains
+   - Add domain: webgis.papuabaratdaya.app
+
+2. Di DNS Management domain Anda:
+   - Tambahkan CNAME record:
+     Name: webgis
+     Value: cname.vercel-dns.com
+     TTL: 3600
+
+3. Tunggu 5-30 menit untuk DNS propagation
+
+4. Vercel akan otomatis generate SSL certificate
+
+
+UPDATE WEBSITE DI MASA DEPAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Jika sudah connect ke GitHub:
+
+1. Edit kode di komputer
+2. Commit dan push:
+   git add .
+   git commit -m "Update fitur X"
+   git push
+
+3. Vercel akan OTOMATIS deploy perubahan!
+4. Tunggu 2-5 menit, website sudah update
+
+
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Build Failed di Vercel
+   → Check Vercel deployment logs
+   → Pastikan environment variables sudah diset
+   → Coba build lokal dulu: npm run build
+
+❌ Halaman putih setelah deploy
+   → Check browser console (F12)
+   → Pastikan environment variables benar
+   → Check Vercel function logs
+
+❌ Git push error
+   → Pastikan Git sudah terinstall
+   → Pastikan sudah git init dan git remote add
+   → Check username/password GitHub
+
+❌ Domain tidak bisa diakses
+   → Tunggu DNS propagation (sampai 48 jam)
+   → Check DNS record dengan: nslookup domain.com
+
+
+CATATAN PENTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  File .env TIDAK akan ter-upload ke GitHub (sudah di .gitignore)
+    Anda harus set Environment Variables di Vercel Dashboard!
+
+⚠️  Data GIS di folder public/data akan ikut ter-deploy
+    Pastikan file-file besar sudah di-compress atau pakai CDN
+
+⚠️  Vercel gratis punya limit:
+    - 100 GB bandwidth/bulan
+    - 100 deployments/hari
+    - Cukup untuk website pemerintah skala kecil-menengah
+
+
+BANTUAN LEBIH LANJUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Dokumentasi Vercel: https://vercel.com/docs
+- Vercel Support: https://vercel.com/support
+- GitHub Docs: https://docs.github.com
+
+═══════════════════════════════════════════════════════════════════

@@ -55,13 +55,24 @@ const Profil = () => {
 
             <TabsContent value="visi-misi" className="mt-8">
               <div className="grid gap-6">
+                {/* Pejabat Provinsi (Moved from Struktur) */}
+                <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-xl border-2 border-primary/20 shadow-lg">
+                  <h3 className="text-xl font-bold text-center text-primary mb-6">Pimpinan Provinsi Papua Barat Daya</h3>
+                  <div className="flex justify-center mb-6">
+                    <img
+                      src="/images/gubernur-wagub.png"
+                      alt="Gubernur dan Wakil Gubernur Papua Barat Daya"
+                      className="max-w-full h-auto rounded-lg shadow-md"
+                    />
+                  </div>
+                </div>
                 <Card className="shadow-card">
                   <CardHeader>
                     <CardTitle className="text-2xl text-primary">Visi</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-lg text-card-foreground leading-relaxed">
-                      "{profile.visi}"
+                    <p className="text-lg text-card-foreground leading-relaxed italic font-medium">
+                      "Masyarakat Papua Barat Daya yang Maju, Mandiri dan Sejahtera Berbasis Pertumbuhan Ekonomi Lokal Sebagai Upaya Pembangunan yang Berkesinambungan dan Berkelanjutan"
                     </p>
                   </CardContent>
                 </Card>
@@ -71,12 +82,22 @@ const Profil = () => {
                     <CardTitle className="text-2xl text-primary">Misi</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ol className="list-decimal list-inside space-y-3 text-card-foreground">
-                      {profile.misi.map((item: string, index: number) => (
-                        <li key={index} className="leading-relaxed">
-                          {item}
-                        </li>
-                      ))}
+                    <ol className="list-decimal list-inside space-y-4 text-card-foreground text-justify">
+                      <li className="leading-relaxed">
+                        <strong>Mewujudkan SDM yang Berkualitas dan Inovatif Berbasis Modal Sosial.</strong> Peningkatan kualitas sumber daya manusia, dengan fokus pada sektor pendidikan dan kesehatan dimulai dari ibu hamil hingga anak-anak, serta memastikan pendidikan berkualitas yang dapat diakses oleh semua lapisan masyarakat. Kalau kita bicara SDM yang unggul, penguatan dimulai dari kesehatan baik ibu hamil hingga bayi lahir dan proses pertumbuhannya.
+                      </li>
+                      <li className="leading-relaxed">
+                        <strong>Membangun tata kelola pemerintahan yang baik dengan mengadopsi teknologi berbasis e-goverment</strong> untuk menciptakan transparansi dan efisiensi dalam pemerintahan. Untuk meningkatkan tata kelola pemerintahan yang baik transparan dan akuntabel guna mendukung pembangunan yang berkelanjutan;
+                      </li>
+                      <li className="leading-relaxed">
+                        <strong>Pengembangan ekonomi berbasis potensi lokal,</strong> dengan memanfaatkan sumber daya alam yang melimpah di Papua Barat Daya sebagai penggerak utama ekonomi daerah;
+                      </li>
+                      <li className="leading-relaxed">
+                        <strong>Peningkatan konektivitas wilayah,</strong> untuk mengatasi masalah keterisolasian beberapa daerah dan memastikan pemerataan pembangunan infrastruktur agar pembangunan dapat dirasakan merata oleh masyarakat;
+                      </li>
+                      <li className="leading-relaxed">
+                        <strong>Penguatan adat dan budaya lokal,</strong> yang menjadi dasar dari otonomi khusus Papua Barat Daya. Kami berkomitmen untuk menjaga hak-hak masyarakat adat dan melibatkan mereka dalam proses pembangunan daerah dengan kearifan lokal yang ada.
+                      </li>
                     </ol>
                   </CardContent>
                 </Card>
@@ -92,17 +113,7 @@ const Profil = () => {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  {/* Pejabat Provinsi */}
-                  <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-xl border-2 border-primary/20 shadow-lg">
-                    <h3 className="text-xl font-bold text-center text-primary mb-6">Pimpinan Provinsi Papua Barat Daya</h3>
-                    <div className="flex justify-center mb-6">
-                      <img
-                        src="/images/gubernur-wagub.png"
-                        alt="Gubernur dan Wakil Gubernur Papua Barat Daya"
-                        className="max-w-full h-auto rounded-lg shadow-md"
-                      />
-                    </div>
-                  </div>
+                  {/* Pejabat Provinsi - Moved to Visi Misi */}
 
                   {/* Kepala Dinas PUPR */}
                   <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-xl border-2 border-orange-200 shadow-lg">

@@ -50,6 +50,11 @@ const Footer = () => {
                   Web GIS PUPR
                 </a>
               </li>
+              <li>
+                <a href="/admin/login" className="hover:text-accent transition-colors">
+                  Login Admin
+                </a>
+              </li>
             </ul>
           </div>
         </div>
