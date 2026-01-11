@@ -75,7 +75,20 @@ export const skHutanLegend: LegendItem[] = [
 // Flood Risk styling
 export const floodRiskStyle = (feature: any): PathOptions => {
     const props = feature?.properties || {};
-    // Try different possible field names for risk level
+
+    // Apply categorical coloring if specific name exists (like Kawasan Hutan)
+    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.KETERANGAN || props.REMARK || '';
+    if (namaKawasan && namaKawasan !== '-' && typeof namaKawasan === 'string' && namaKawasan.length > 2) {
+        // Use the same hashing function as Kawasan Hutan
+        return {
+            color: stringToColor(namaKawasan),
+            weight: 1,
+            opacity: 0.9,
+            fillOpacity: 0.7
+        };
+    }
+
+    // Fallback to Risk Level based coloring
     const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '';
     const riskValue = props.NILAI || props.VALUE || 0;
 
@@ -214,7 +227,7 @@ export const kemampuanLahanStyle = (feature: any): PathOptions => {
 
     // Color mapping based on capability class
     // If specific name present, use that for distinct color
-    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || '';
+    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.KETERANGAN || '';
 
     if (namaKawasan && namaKawasan !== '-') {
         color = stringToColor(namaKawasan);
