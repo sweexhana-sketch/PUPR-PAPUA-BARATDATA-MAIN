@@ -69,18 +69,7 @@ export const GIS_LAYERS: GisLayer[] = [
         styleFunction: contourStyle,
         legendItems: contourLegend
     },
-    {
-        id: 'sk_hutan',
-        name: 'SK Kawasan Hutan',
-        file: 'SK_HUTAN_6620_AR (4).json',
-        url: 'https://qbvlqrjewdetjkvvszjq.supabase.co/storage/v1/object/public/webgis-data/SK_HUTAN_6620_AR%20(4).json',
-        visible: false,
-        color: '#2E7D32',
-        category: 'environment',
-        highlightable: true,
-        styleFunction: skHutanStyle,
-        legendItems: skHutanLegend
-    },
+
     {
         id: 'bts_desa',
         name: 'Batas Desa',
