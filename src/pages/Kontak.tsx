@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone, Clock, Send } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, Send, Facebook, Instagram, Youtube } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getContact } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,6 +180,31 @@ const Kontak = () => {
                         </a>
                       </li>
                     </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Social Media Card */}
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-primary">Media Sosial</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-4">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="bg-secondary/20 p-3 rounded-full hover:bg-primary hover:text-primary-foreground transition-all" aria-label="Facebook">
+                      <Facebook className="h-6 w-6" />
+                    </a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="bg-secondary/20 p-3 rounded-full hover:bg-primary hover:text-primary-foreground transition-all" aria-label="Instagram">
+                      <Instagram className="h-6 w-6" />
+                    </a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="bg-secondary/20 p-3 rounded-full hover:bg-primary hover:text-primary-foreground transition-all" aria-label="TikTok">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                      </svg>
+                    </a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="bg-secondary/20 p-3 rounded-full hover:bg-primary hover:text-primary-foreground transition-all" aria-label="YouTube">
+                      <Youtube className="h-6 w-6" />
+                    </a>
                   </div>
                 </CardContent>
               </Card>

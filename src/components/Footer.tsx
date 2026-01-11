@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Facebook, Instagram, Youtube } from "lucide-react";
 import logoPupr from "@/assets/logo-pupr.png";
 
 const Footer = () => {
@@ -56,6 +56,31 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
+
+            {/* Social Media */}
+            <div className="pt-4">
+              <h3 className="font-bold text-lg mb-4">Sosial Media</h3>
+              <div className="flex gap-4">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-all" aria-label="Facebook">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-all" aria-label="Instagram">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-all" aria-label="TikTok">
+                  {/* TikTok Icon using SVG since it's not in Lucide */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                  </svg>
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-all" aria-label="YouTube">
+                  <Youtube className="h-5 w-5" />
+                </a>
+                <a href="mailto:pupr.papuabaratdaya@gmail.com" className="bg-white/10 p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-all" aria-label="Email">
+                  <Mail className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
