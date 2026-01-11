@@ -16,6 +16,7 @@ const Navbar = () => {
     { name: "Galeri", path: "/galeri" },
     { name: "Kontak", path: "/kontak" },
     { name: "Web GIS", path: "/webgis" },
+    { name: "Sistem Stunting & Kemiskinan", path: "https://stunting-poverty-insights-main.vercel.app/", external: true },
     { name: "SIGAP", path: "https://aplikasi-sigap-dpupr-pbd.vercel.app/login", external: true },
   ];
 
