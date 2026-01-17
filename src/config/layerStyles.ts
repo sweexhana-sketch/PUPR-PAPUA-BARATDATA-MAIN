@@ -76,20 +76,22 @@ export const skHutanLegend: LegendItem[] = [
 export const floodRiskStyle = (feature: any): PathOptions => {
     const props = feature?.properties || {};
 
-    // Apply categorical coloring if specific name exists (like Kawasan Hutan)
-    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.KETERANGAN || props.REMARK || '';
-    if (namaKawasan && namaKawasan !== '-' && typeof namaKawasan === 'string' && namaKawasan.length > 2) {
-        // Use the same hashing function as Kawasan Hutan
+    // Apply categorical coloring based on distinct location/name attributes first
+    // This gives the "variety" look requested by user, similar to Forest Area
+    const uniqueKey = props.NAMOBJ || props.NAMA_KAWASAN || props.DESA || props.LOKASI || props.REMARK || '';
+
+    // Only use categorical coloring if we have a valid unique key string
+    if (uniqueKey && uniqueKey !== '-' && typeof uniqueKey === 'string' && uniqueKey.length > 1) {
         return {
-            color: stringToColor(namaKawasan),
+            color: stringToColor(uniqueKey),
             weight: 1,
             opacity: 0.9,
-            fillOpacity: 0.7
+            fillOpacity: 0.6
         };
     }
 
-    // Fallback to Risk Level based coloring
-    const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '';
+    // Fallback to Risk Level based coloring if no specific location name
+    const riskLevel = props.rwn_banjir || props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '';
     const riskValue = props.NILAI || props.VALUE || 0;
 
     let color = '#00C853'; // Default: Green (Low Risk)
@@ -221,17 +223,25 @@ export const transparentFloodRiskStyle = (feature: any): PathOptions => {
 // Land Capability styling
 export const kemampuanLahanStyle = (feature: any): PathOptions => {
     const props = feature?.properties || {};
+
+    // Prioritize categorical coloring based on class/ability description
+    // This ensures different capability classes get different colors
     const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || props.KETERANGAN || '';
 
+    if (kelas && kelas !== '-') {
+        return {
+            color: stringToColor(kelas),
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0.6
+        };
+    }
+
+    // Fallback logic (though the above covers most if KELAS exists)
     let color = '#8BC34A'; // Default: light green
 
     // Color mapping based on capability class
-    // If specific name present, use that for distinct color
-    const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.KETERANGAN || '';
-
-    if (namaKawasan && namaKawasan !== '-') {
-        color = stringToColor(namaKawasan);
-    } else if (kelas.includes('VIII') || kelas.includes('8')) {
+    if (kelas.includes('VIII') || kelas.includes('8')) {
         color = '#B71C1C'; // Red - Very limited
     } else if (kelas.includes('VII') || kelas.includes('7')) {
         color = '#E65100'; // Orange - Severe limitations
@@ -346,3 +356,29 @@ export const batasDesaHighlightStyle: PathOptions = {
     fillOpacity: 0.5, // Semi-transparent fill for "light up" effect
     dashArray: '10, 5' // Dashed line for active look
 };
+// DAS (Watershed) styling
+export const dasStyle = (feature: any): PathOptions => {
+    const props = feature?.properties || {};
+    const namaDas = props.nama_das || props.NAMA_DAS || props.DAS || props.NAMOBJ || '';
+
+    // Color based on DAS name for distinct visualization
+    if (namaDas && namaDas !== '-') {
+        return {
+            color: stringToColor(namaDas),
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.4
+        };
+    }
+
+    return {
+        color: '#2196F3', // Default Blue
+        weight: 2,
+        opacity: 0.8,
+        fillOpacity: 0.4
+    };
+};
+
+export const dasLegend: LegendItem[] = [
+    { color: '#2196F3', label: 'Batas DAS' }
+];

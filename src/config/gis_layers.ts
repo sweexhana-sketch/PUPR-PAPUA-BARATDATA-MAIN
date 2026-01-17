@@ -1,5 +1,5 @@
 import { PathOptions } from 'leaflet';
-import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, kemampuanLahanStyle, kemampuanLahanLegend, longsorRiskStyle, longsorRiskLegend, banjirBandangRiskStyle, banjirBandangRiskLegend, LegendItem, transparentStyle, batasDesaHighlightStyle } from './layerStyles';
+import { skHutanStyle, skHutanLegend, floodRiskStyle, floodRiskLegend, contourStyle, contourLegend, kemampuanLahanStyle, kemampuanLahanLegend, longsorRiskStyle, longsorRiskLegend, banjirBandangRiskStyle, banjirBandangRiskLegend, dasStyle, dasLegend, LegendItem, transparentStyle, batasDesaHighlightStyle } from './layerStyles';
 
 export interface GisLayer {
     id: string;
@@ -16,16 +16,6 @@ export interface GisLayer {
 
 export const GIS_LAYERS: GisLayer[] = [
     {
-        id: 'jln_provinsi',
-        name: 'Jalan Provinsi',
-        file: 'jlnprovinsi_7.js',
-        url: 'https://qbvlqrjewdetjkvvszjq.supabase.co/storage/v1/object/public/webgis-data/jlnprovinsi_7.js',
-        visible: true,
-        color: '#FF0000',
-        category: 'infrastructure',
-        highlightable: true
-    },
-    {
         id: 'das_pbd',
         name: 'Daerah Aliran Sungai (DAS)',
         file: 'DASPBD_2.js',
@@ -33,7 +23,9 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: false,
         color: '#0000FF',
         category: 'environment',
-        highlightable: true
+        highlightable: true,
+        styleFunction: dasStyle,
+        legendItems: dasLegend
     },
     {
         id: 'dis_banjir',
@@ -78,6 +70,17 @@ export const GIS_LAYERS: GisLayer[] = [
         visible: true,
         color: '#FF6F00',
         category: 'administrative',
+        highlightable: true,
+        styleFunction: transparentStyle
+    },
+    {
+        id: 'bts_kab',
+        name: 'Batas Kabupaten',
+        file: 'btskab_0.js',
+        url: '/data/btskab_0.js',
+        visible: true,
+        color: '#FF6F00', // Matches admin color
+        category: 'administrative', // Matches admin category
         highlightable: true,
         styleFunction: transparentStyle
     },

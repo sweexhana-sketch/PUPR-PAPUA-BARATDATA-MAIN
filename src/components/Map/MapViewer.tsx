@@ -266,8 +266,19 @@ export const MapViewer: React.FC = () => {
                         ${generateAttributesTable(props)}
                     </div>
                 </div>
+                </div>
             `;
-        } else if (layerId === 'sk_hutan' || layerId === 'kwsn_hutan_new') {
+        } else if (layerId === 'bts_kab') {
+            // Batas Kabupaten - Show only Name (Simplified)
+            const kabupaten = props.NAMOBJ || props.KABUPATEN || props.NAMA_KAB || props.WADMKK || '-';
+
+            popupContent = `
+                <div class="min-w-[150px]">
+                    <div class="bg-white px-3 py-2 rounded-lg border border-orange-200 shadow-sm text-center">
+                         <div class="text-sm font-bold text-gray-800 uppercase tracking-wide">${kabupaten}</div>
+                    </div>
+                </div>
+            `;
             // SK Hutan - Show forest zone with color indicator
             const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.NAMA || '-';
             const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.JENIS || '-';
@@ -319,7 +330,7 @@ export const MapViewer: React.FC = () => {
             `;
         } else if (layerId === 'dis_banjir') {
             // Flood Risk - Show risk level with color
-            const riskLevel = props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '-';
+            const riskLevel = props.rwn_banjir || props.RESIKO || props.TINGKAT || props.LEVEL || props.KELAS || '-';
             const lokasi = props.LOKASI || props.DESA || props.NAMOBJ || '-';
 
             let riskColor = 'bg-green-600';
@@ -550,7 +561,7 @@ export const MapViewer: React.FC = () => {
 
         // If highlighted, use highlight style
         if (isHighlighted) {
-            if (layer.id === 'bts_desa') {
+            if (layer.id === 'bts_desa' || layer.id === 'bts_kab') {
                 return batasDesaHighlightStyle;
             } else if (layer.id === 'dis_banjir' || layer.category === 'risk') {
                 // Use the new glowing style for risk layers
