@@ -11,7 +11,8 @@ import {
     LogOut,
     Menu,
     X,
-    FileText
+    FileText,
+    Scale
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -25,6 +26,7 @@ const AdminLayout = () => {
         { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { path: "/admin/berita", label: "Berita", icon: Newspaper },
         { path: "/admin/galeri", label: "Galeri", icon: ImageIcon },
+        { path: "/admin/produk-hukum", label: "Produk Hukum", icon: Scale },
         { path: "/admin/sop", label: "SOP", icon: FileText },
         { path: "/admin/profil", label: "Profil", icon: User },
         { path: "/admin/hero", label: "Beranda (Hero)", icon: Home },

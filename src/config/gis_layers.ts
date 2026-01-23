@@ -65,8 +65,8 @@ export const GIS_LAYERS: GisLayer[] = [
     {
         id: 'bts_desa',
         name: 'Batas Desa',
-        file: 'batasdesapbd_new.js',
-        url: '/data/batasdesapbd_new.js',
+        file: 'desapbd2.json',
+        url: '/data/desapbd2.json',
         visible: true,
         color: '#FF6F00',
         category: 'administrative',
@@ -76,8 +76,8 @@ export const GIS_LAYERS: GisLayer[] = [
     {
         id: 'bts_kab',
         name: 'Batas Kabupaten',
-        file: 'btskab_0.js',
-        url: '/data/btskab_0.js',
+        file: 'btskab_2.json',
+        url: '/data/btskab_2.json',
         visible: true,
         color: '#FF6F00', // Matches admin color
         category: 'administrative', // Matches admin category
@@ -213,8 +213,8 @@ export const GIS_LAYERS: GisLayer[] = [
     {
         id: 'kemampuan_lahan_pbd',
         name: 'Kemampuan Lahan',
-        file: 'kemampuan lahan.json',
-        url: '/data/kemampuan%20lahan.json',
+        file: 'kemampuan lahan B.json',
+        url: '/data/kemampuan%20lahan%20B.json',
         visible: false,
         color: '#8BC34A',
         category: 'environment',
@@ -225,8 +225,8 @@ export const GIS_LAYERS: GisLayer[] = [
     {
         id: 'kwsn_hutan_new',
         name: 'Kawasan Hutan (Update)',
-        file: 'kwsnhtn.json',
-        url: '/data/kwsnhtn.json',
+        file: 'kwsnhtn 1.json',
+        url: '/data/kwsnhtn%201.json',
         visible: false,
         color: '#388E3C',
         category: 'environment',

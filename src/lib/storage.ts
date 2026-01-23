@@ -8,9 +8,10 @@ export const STORAGE_KEYS = {
     HERO: "site_hero",
     CONTACT: "site_contact",
     SOP: "site_sop",
+    LEGAL: "site_legal",
 };
 
-// Default Data (moved from components)
+// Default Data
 
 const DEFAULT_NEWS = [
     {
@@ -123,6 +124,12 @@ const DEFAULT_SOP = [
     { id: 4, title: "SOP Bidang Perumahan", file: "/documents/SOP-PR.rar", size: "RAR", code: "SOP-PR-001" },
     { id: 5, title: "SOP Bina Konstruksi", file: "/documents/SOP-BK.rar", size: "RAR", code: "SOP-BK-001" },
     { id: 6, title: "SOP Sekretariat", file: "/documents/SOP-SEK.rar", size: "RAR", code: "SOP-SEK-001" },
+];
+
+const DEFAULT_LEGAL = [
+    { id: 1, title: "Perda RTRW Provinsi Papua Barat Daya", number: "No. 1 Tahun 2024", type: "Peraturan Daerah", year: "2024", file: "/documents/PERDA-RTRW.pdf", size: "PDF" },
+    { id: 2, title: "Pergub tentang Tugas dan Fungsi Dinas PUPR", number: "No. 05 Tahun 2023", type: "Peraturan Gubernur", year: "2023", file: "/documents/PERGUB-TUSI.pdf", size: "PDF" },
+    { id: 3, title: "SK Gubernur tentang Pembentukan Tim Teknis", number: "No. 100.3.3/15/2024", type: "SK Gubernur", year: "2024", file: "/documents/SK-TIM.pdf", size: "PDF" },
 ];
 
 const DEFAULT_GALLERY = [
@@ -329,6 +336,7 @@ export const getProfile = () => getStorageData(STORAGE_KEYS.PROFILE, DEFAULT_PRO
 export const getHeroSlides = () => getStorageData(STORAGE_KEYS.HERO, DEFAULT_HERO);
 export const getContact = () => getStorageData(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT);
 export const getSOP = () => getStorageData(STORAGE_KEYS.SOP, DEFAULT_SOP);
+export const getLegalDocs = () => getStorageData(STORAGE_KEYS.LEGAL, DEFAULT_LEGAL);
 
 // Specific setters
 export const saveNews = (data: any) => setStorageData(STORAGE_KEYS.NEWS, data);
@@ -337,3 +345,4 @@ export const saveProfile = (data: any) => setStorageData(STORAGE_KEYS.PROFILE, d
 export const saveHeroSlides = (data: any) => setStorageData(STORAGE_KEYS.HERO, data);
 export const saveContact = (data: any) => setStorageData(STORAGE_KEYS.CONTACT, data);
 export const saveSOP = (data: any) => setStorageData(STORAGE_KEYS.SOP, data);
+export const saveLegalDocs = (data: any) => setStorageData(STORAGE_KEYS.LEGAL, data);

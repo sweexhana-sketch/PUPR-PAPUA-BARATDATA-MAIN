@@ -22,6 +22,7 @@ import ManageSOP from "./pages/admin/ManageSOP";
 import ManageProfile from "./pages/admin/ManageProfile";
 import ManageHero from "./pages/admin/ManageHero";
 import ManageContact from "./pages/admin/ManageContact";
+import ManageLegalDocs from "./pages/admin/ManageLegalDocs";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="berita" element={<ManageNews />} />
               <Route path="galeri" element={<ManageGallery />} />
+              <Route path="produk-hukum" element={<ManageLegalDocs />} />
               <Route path="sop" element={<ManageSOP />} />
               <Route path="profil" element={<ManageProfile />} />
               <Route path="hero" element={<ManageHero />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getGallery, getSOP } from "@/lib/storage";
-import { X, ZoomIn, FolderArchive, Download, FileText } from "lucide-react";
+import { getGallery, getSOP, getLegalDocs } from "@/lib/storage";
+import { X, ZoomIn, FolderArchive, Download, FileText, Scale } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogTrigger, DialogClose } from "@/components/ui/dialog";
@@ -10,28 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Galeri = () => {
     const [galleryItems, setGalleryItems] = useState<any[]>([]);
+    const [portalItems, setPortalItems] = useState<any[]>([]);
+    const [legalItems, setLegalItems] = useState<any[]>([]);
 
     useEffect(() => {
         setGalleryItems(getGallery());
+        setPortalItems(getSOP());
+        setLegalItems(getLegalDocs());
 
         // Listen for storage updates
         const handleStorageUpdate = () => {
             setGalleryItems(getGallery());
-        };
-
-        window.addEventListener("storage-update", handleStorageUpdate);
-        return () => window.removeEventListener("storage-update", handleStorageUpdate);
-    }, []);
-
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    const [portalItems, setPortalItems] = useState<any[]>([]);
-
-    useEffect(() => {
-        setPortalItems(getSOP());
-
-        const handleStorageUpdate = () => {
             setPortalItems(getSOP());
+            setLegalItems(getLegalDocs());
         };
 
         window.addEventListener("storage-update", handleStorageUpdate);
@@ -47,10 +38,10 @@ const Galeri = () => {
                 <div className="bg-gradient-ocean py-16">
                     <div className="container mx-auto px-4">
                         <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground text-center">
-                            Galeri Kegiatan
+                            Galeri Kegiatan & Data
                         </h1>
                         <p className="text-center text-primary-foreground/90 mt-4 text-lg">
-                            Dokumentasi visual kegiatan dan pembangunan Dinas PUPR Papua Barat Daya
+                            Dokumentasi visual, Portal SOP, dan Produk Hukum Dinas PUPR Papua Barat Daya
                         </p>
                     </div>
                 </div>
@@ -59,9 +50,10 @@ const Galeri = () => {
                 <div className="container mx-auto px-4 py-12">
                     <Tabs defaultValue="kegiatan" className="w-full">
                         <div className="flex justify-center mb-12">
-                            <TabsList className="grid w-full max-w-md grid-cols-2">
-                                <TabsTrigger value="kegiatan">Dokumentasi Kegiatan</TabsTrigger>
+                            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+                                <TabsTrigger value="kegiatan">Dokumentasi</TabsTrigger>
                                 <TabsTrigger value="portal">Portal Data SOP</TabsTrigger>
+                                <TabsTrigger value="hukum">Produk Hukum</TabsTrigger>
                             </TabsList>
                         </div>
 
@@ -157,8 +149,69 @@ const Galeri = () => {
                                         </a>
                                     </div>
                                 ))}
+                            </div>
+                        </TabsContent>
 
+                        <TabsContent value="hukum">
+                            <div className="grid grid-cols-1 gap-4">
+                                {legalItems.map((item) => (
+                                    <div key={item.id} className="bg-card hover:bg-accent/30 transition-colors border rounded-xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                                        <div className="flex items-start gap-4">
+                                            <div className={`p-3 rounded-lg text-white shrink-0 
+                                                ${item.type === 'Peraturan Daerah' ? 'bg-blue-600' :
+                                                    item.type === 'Peraturan Gubernur' ? 'bg-green-600' :
+                                                        'bg-purple-600'}`}>
+                                                <Scale className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider
+                                                        ${item.type === 'Peraturan Daerah' ? 'bg-blue-100 text-blue-700' :
+                                                            item.type === 'Peraturan Gubernur' ? 'bg-green-100 text-green-700' :
+                                                                'bg-purple-100 text-purple-700'}`}>
+                                                        {item.type}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">Tahun {item.year}</span>
+                                                </div>
+                                                <h3 className="text-lg font-bold text-foreground mb-1">
+                                                    {item.title}
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground font-mono">
+                                                    {item.number}
+                                                </p>
+                                            </div>
+                                        </div>
 
+                                        <a
+                                            href={item.file || '#'}
+                                            download={
+                                                item.file?.startsWith('data:')
+                                                    ? `${item.title.replace(/[^a-z0-9]/gi, '_')}.${item.size?.toLowerCase() || 'pdf'}`
+                                                    : item.file?.startsWith('/')
+                                                        ? item.file.split('/').pop()
+                                                        : undefined
+                                            }
+                                            target={item.file?.startsWith('http') ? "_blank" : undefined}
+                                            rel={item.file?.startsWith('http') ? "noopener noreferrer" : undefined}
+                                            onClick={(e) => {
+                                                if (!item.file || item.file === '#') {
+                                                    e.preventDefault();
+                                                    alert('File tidak tersedia');
+                                                }
+                                            }}
+                                            className="shrink-0 w-full md:w-auto bg-outline border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium"
+                                        >
+                                            <Download className="h-4 w-4" />
+                                            Download {item.size || 'PDF'}
+                                        </a>
+                                    </div>
+                                ))}
+                                {legalItems.length === 0 && (
+                                    <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed">
+                                        <Scale className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                        <p>Belum ada produk hukum yang tersedia.</p>
+                                    </div>
+                                )}
                             </div>
                         </TabsContent>
                     </Tabs>

@@ -32,7 +32,7 @@ const stringToColor = (str: string): string => {
 export const skHutanStyle = (feature: any): PathOptions => {
     const props = feature?.properties || {};
     const namaKawasan = props.NAMOBJ || props.NAMA_KAWASAN || props.NAMA || '';
-    const fungsi = props.FUNGSI_KWS || props.FUNGSI || '';
+    const fungsi = props.FUNGSI_KWS || props.FUNGSI || props.FUNGSIKWS || '';
 
     // If we have a specific area name, use it to generate a unique color
     // This satisfies the request to "bedakan nama kawasan masing2"
@@ -128,11 +128,11 @@ export const floodRiskStyle = (feature: any): PathOptions => {
 
 // Highlight style specifically for Flood Risk (Glowing effect)
 export const floodRiskHighlightStyle: PathOptions = {
-    weight: 4,
-    color: '#00FFFF', // Cyan neon glow
+    className: 'map-shape-glow',
+    weight: 6,
+    color: '#FF00FF', // Neon Magenta
     opacity: 1,
-    fillOpacity: 0.9, // Very bright fill
-    dashArray: '10, 5' // Dashed line for "active" look
+    fillOpacity: 0.2
 };
 
 export const floodRiskLegend: LegendItem[] = [
@@ -185,12 +185,12 @@ export const contourLegend: LegendItem[] = [
 ];
 
 // Highlight style for clicked features
-// Highlight style for clicked features
 export const highlightStyle: PathOptions = {
+    className: 'map-shape-glow',
     weight: 6,
-    color: '#00FFFF', // Cyan for "glowing" effect
+    color: '#FF00FF', // Neon Magenta
     opacity: 1,
-    fillOpacity: 0.6 // Slightly lower fill opacity to blend
+    fillOpacity: 0.2
 };
 
 // Transparent style for polygon layers that need to show background
@@ -226,7 +226,7 @@ export const kemampuanLahanStyle = (feature: any): PathOptions => {
 
     // Prioritize categorical coloring based on class/ability description
     // This ensures different capability classes get different colors
-    const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || props.KETERANGAN || '';
+    const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || props.KETERANGAN || props.PL_SNI2014 || '';
 
     if (kelas && kelas !== '-') {
         return {
@@ -350,11 +350,20 @@ export const banjirBandangRiskLegend: LegendItem[] = [
 
 // Highlight style for Batas Desa (Glowing Outline)
 export const batasDesaHighlightStyle: PathOptions = {
-    weight: 4,
-    color: '#00FFFF', // Cyan / Electric Blue
+    className: 'map-shape-glow',
+    weight: 6,
+    color: '#FF00FF', // Neon Magenta
     opacity: 1,
-    fillOpacity: 0.5, // Semi-transparent fill for "light up" effect
-    dashArray: '10, 5' // Dashed line for active look
+    fillOpacity: 0.2
+};
+
+// Highlight style for Batas Kabupaten (Transparent Fill, Glowing Outline)
+export const batasKabupatenHighlightStyle: PathOptions = {
+    className: 'map-shape-glow',
+    weight: 5,
+    color: '#FF00FF', // Neon Magenta
+    opacity: 1,
+    fillOpacity: 0 // Transparent Fill
 };
 // DAS (Watershed) styling
 export const dasStyle = (feature: any): PathOptions => {

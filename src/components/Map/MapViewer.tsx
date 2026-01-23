@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, GeoJSON, useMapEvents, Popup } from 'react-lea
 import 'leaflet/dist/leaflet.css';
 import { GIS_LAYERS, GisLayer } from '@/config/gis_layers';
 import { BASEMAPS } from '@/config/basemaps';
-import { highlightStyle, batasDesaHighlightStyle } from '@/config/layerStyles';
+import { highlightStyle, batasDesaHighlightStyle, batasKabupatenHighlightStyle, floodRiskHighlightStyle } from '@/config/layerStyles';
 import { findFeaturesAtPoint } from '@/lib/geoUtils';
 import { WebGISNavbar } from './WebGISNavbar';
 import { WebGISSidebar } from './WebGISSidebar';
@@ -126,33 +126,27 @@ export const MapViewer: React.FC = () => {
                 let featureCollection;
 
                 if (data.type === 'FeatureCollection') {
-                    // Standard FeatureCollection
                     featureCollection = data;
                 } else if (data.type === 'Feature') {
-                    // Single Feature - wrap in FeatureCollection
                     featureCollection = {
                         type: 'FeatureCollection',
                         features: [data]
                     };
                 } else if (data.type === 'GeometryCollection') {
-                    // GeometryCollection - convert to FeatureCollection
                     featureCollection = {
                         type: 'FeatureCollection',
                         features: data.geometries.map((geom: any, idx: number) => ({
                             type: 'Feature',
-                            id: idx,
                             geometry: geom,
                             properties: {}
                         }))
                     };
                 } else if (Array.isArray(data)) {
-                    // Array of features
                     featureCollection = {
                         type: 'FeatureCollection',
                         features: data
                     };
                 } else if (data.features && Array.isArray(data.features)) {
-                    // Has features array but missing type
                     featureCollection = {
                         type: 'FeatureCollection',
                         features: data.features
@@ -160,6 +154,15 @@ export const MapViewer: React.FC = () => {
                 } else {
                     console.error(`Unsupported format for ${layer.name}:`, data);
                     throw new Error(`Unsupported GeoJSON format. Type: ${data.type || 'unknown'}`);
+                }
+
+                // Ensure every feature has a unique ID for React keys and Highlighting
+                if (featureCollection.features) {
+                    featureCollection.features.forEach((f: any, idx: number) => {
+                        if (!f.id && !f.properties?.id) {
+                            f.id = idx; // Assign index as fallback ID
+                        }
+                    });
                 }
 
                 console.log(`Success: Converted ${layer.name} to FeatureCollection. Features: ${featureCollection.features?.length || 0}`);
@@ -487,9 +490,10 @@ export const MapViewer: React.FC = () => {
             });
 
             // Highlight ALL found features
+            // IMPORTANT: Use the assigned ID if available
             setHighlightedFeatures(features.map(({ layer, feature }) => ({
                 layerId: layer.id,
-                featureId: feature.id || feature.properties?.id || Math.random() // Fallback if no ID
+                featureId: feature.id !== undefined ? feature.id : feature.properties?.id // Use ID assigned during load
             })));
         } else {
             setPopupInfo(null);
@@ -508,7 +512,7 @@ export const MapViewer: React.FC = () => {
                 handleMapClick(e.latlng);
             });
 
-            // Hover effects for InfoBar
+            // Hover effects for InfoBar and Highlight
             leafletLayer.on('mouseover', (e: any) => {
                 const props = feature.properties;
                 // Determine best label based on layer type
@@ -533,18 +537,14 @@ export const MapViewer: React.FC = () => {
 
             leafletLayer.on('mouseout', (e: any) => {
                 setHoverInfo(null);
-                // Reset style triggers re-render via state usually, but for simple hover we can just let react-leaflet handle it 
-                // or ideally we rely on the declared style function.
-                // Resetting style directly on leafet layer is tricky without full state reset.
-                // For now, let's just clear the text.
-                // To properly reset style we would need to re-apply the original style.
+
+                // Reset style styling
                 if (layer.highlightable) {
                     // Re-apply original style logic basically
                     const opacity = (layerOpacity[layerId] || 100) / 100;
-                    // This is a bit hacky, better to let React handle it, but for performance:
                     leafletLayer.setStyle({
-                        weight: layerId === 'bts_desa' ? 4 : (layerId.includes('kontur') ? 1 : 2),
-                        fillOpacity: (layerId === 'bts_desa' || layerId.includes('kontur')) ? 0 : 0.3 * opacity
+                        weight: layerId.includes('kontur') ? 1 : 2,
+                        fillOpacity: (layerId.includes('kontur')) ? 0 : 0.3 * opacity
                     });
                 }
             });
@@ -561,26 +561,12 @@ export const MapViewer: React.FC = () => {
 
         // If highlighted, use highlight style
         if (isHighlighted) {
-            if (layer.id === 'bts_desa' || layer.id === 'bts_kab') {
+            if (layer.id === 'bts_desa') {
                 return batasDesaHighlightStyle;
+            } else if (layer.id === 'bts_kab') {
+                return batasKabupatenHighlightStyle;
             } else if (layer.id === 'dis_banjir' || layer.category === 'risk') {
-                // Use the new glowing style for risk layers
-                // Need to import it first, but since we are replacing logic inside the component, 
-                // we assume it is/will be available. 
-                // Wait, I need to make sure floodRiskHighlightStyle is imported.
-                // Since I cannot change imports easily with this tool without multiple chunks,
-                // I will use properties directly if imports are missing, or rely on the fact that I will add it to imports.
-                // Let's check imports in next step or assume it works if I map it correctly.
-                // Actually, let's just use the style object directly here to be safe if I can't check imports easily right now.
-                // Or better, I'll update imports in a separate step if needed.
-                // For now, I'll return the object literal matching what I defined in layerStyles.
-                return {
-                    weight: 4,
-                    color: '#00FFFF', // Cyan
-                    opacity: 1,
-                    fillOpacity: 0.9,
-                    dashArray: '10, 5'
-                };
+                return floodRiskHighlightStyle;
             }
             return highlightStyle;
         }
@@ -656,9 +642,11 @@ export const MapViewer: React.FC = () => {
                     {layers.map(layer => {
                         if (!layer.visible || !geoJsonData[layer.id]) return null;
 
+                        const layerHighlights = highlightedFeatures.filter(h => h.layerId === layer.id).map(h => h.featureId).join('-');
+
                         return (
                             <GeoJSON
-                                key={`${layer.id}-${highlightedFeatures.length > 0 ? 'highlighted' : 'none'}`}
+                                key={`${layer.id}-${layerHighlights}`}
                                 data={geoJsonData[layer.id]}
                                 style={(feature) => getFeatureStyle(layer, feature)}
                                 onEachFeature={onEachFeature(layer.id, layer)}
