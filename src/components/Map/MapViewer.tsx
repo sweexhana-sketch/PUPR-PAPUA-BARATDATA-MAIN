@@ -102,19 +102,22 @@ export const MapViewer: React.FC = () => {
                 const text = await response.text();
                 console.log(`Data fetched for ${layer.name}. Size: ${text.length} chars`);
 
-                // Check if it's a .json file (pure JSON) or .js file (variable assignment)
+                // Try to parse as pure JSON first (regardless of extension)
                 let data;
-                if (layer.file.endsWith('.json')) {
-                    // Pure JSON file
+                try {
                     data = JSON.parse(text);
-                } else {
-                    // .js file with variable assignment
+                } catch (e) {
+                    // If JSON parse fails, check if it's a .js file with variable assignment
                     const firstBrace = text.indexOf('{');
                     const lastBrace = text.lastIndexOf('}');
 
                     if (firstBrace !== -1 && lastBrace !== -1) {
                         const jsonString = text.substring(firstBrace, lastBrace + 1);
-                        data = JSON.parse(jsonString);
+                        try {
+                            data = JSON.parse(jsonString);
+                        } catch (innerError) {
+                            throw new Error('Failed to parse JSON content from JS file');
+                        }
                     } else {
                         throw new Error('Could not find JSON object structure');
                     }
