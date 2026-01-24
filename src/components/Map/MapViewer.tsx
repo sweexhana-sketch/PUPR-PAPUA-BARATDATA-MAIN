@@ -422,22 +422,23 @@ export const MapViewer: React.FC = () => {
             const keterangan = props.KETERANGAN || props.ARAHAN || '-';
 
             popupContent = `
-                 <div class="min-w-[280px] mb-4">
-                      <div class="bg-lime-50 px-3 py-2 rounded-t-lg border-b border-lime-100 flex items-center justify-between">
-                         <h3 class="font-bold text-sm text-lime-800">${layer.name}</h3>
-                         <span class="text-xs text-lime-700 bg-white px-2 py-0.5 rounded border border-lime-200">Lingkungan</span>
+                 <div class="min-w-[250px]">
+                      <div class="bg-lime-600 px-3 py-2 rounded-t-lg flex items-center justify-between">
+                         <h3 class="font-bold text-sm text-white">Kemampuan Lahan</h3>
                     </div>
-                    <div class="p-3 bg-white rounded-b-lg border border-lime-100 shadow-sm">
+                    <div class="p-4 bg-white rounded-b-lg border border-lime-100 shadow-sm">
                         <div class="mb-3">
-                             <div class="text-xs text-gray-500 font-semibold mb-1">KELAS KEMAMPUAN</div>
-                             <div class="text-lg font-bold text-lime-800">${kelas}</div>
+                             <div class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Kelas</div>
+                             <div class="text-lg font-bold text-lime-800 leading-tight">${kelas}</div>
                         </div>
                         ${keterangan !== '-' ? `
-                        <div class="bg-lime-50/50 p-2 rounded text-sm text-gray-700 mb-2 italic">
-                            "${keterangan}"
+                        <div>
+                             <div class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Arahan Pemanfaatan</div>
+                             <div class="text-sm text-gray-700 leading-relaxed">
+                                 ${keterangan}
+                             </div>
                         </div>
                         ` : ''}
-                        ${generateAttributesTable(props)}
                     </div>
                  </div>
              `;
