@@ -127,9 +127,9 @@ const DEFAULT_SOP = [
 ];
 
 const DEFAULT_LEGAL = [
-    { id: 1, title: "Perda RTRW Provinsi Papua Barat Daya", number: "No. 1 Tahun 2024", type: "Peraturan Daerah", year: "2024", file: "/documents/PERDA-RTRW.pdf", size: "PDF" },
-    { id: 2, title: "Pergub tentang Tugas dan Fungsi Dinas PUPR", number: "No. 05 Tahun 2023", type: "Peraturan Gubernur", year: "2023", file: "/documents/PERGUB-TUSI.pdf", size: "PDF" },
-    { id: 3, title: "SK Gubernur tentang Pembentukan Tim Teknis", number: "No. 100.3.3/15/2024", type: "SK Gubernur", year: "2024", file: "/documents/SK-TIM.pdf", size: "PDF" },
+    { id: 1, title: "Perda RTRW Provinsi Papua Barat Daya", number: "No. 1 Tahun 2024", type: "Peraturan Daerah", year: "2024", file: "/documents/perda-rtrw.pdf", size: "PDF" },
+    { id: 2, title: "Pergub tentang Tugas dan Fungsi Dinas PUPR", number: "No. 05 Tahun 2023", type: "Peraturan Gubernur", year: "2023", file: "/documents/pergub-tusi.pdf", size: "PDF" },
+    { id: 3, title: "SK Gubernur tentang Pembentukan Tim Teknis", number: "No. 100.3.3/15/2024", type: "SK Gubernur", year: "2024", file: "/documents/sk-tim.pdf", size: "PDF" },
 ];
 
 const DEFAULT_GALLERY = [
