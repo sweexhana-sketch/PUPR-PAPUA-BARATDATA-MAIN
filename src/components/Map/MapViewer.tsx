@@ -418,27 +418,55 @@ export const MapViewer: React.FC = () => {
                 </div>
             `;
         } else if (layerId === 'kemampuan_lahan_pbd') {
-            const kelas = props.KELAS || props.KEMAMPUAN || props.NAMOBJ || '-';
-            const keterangan = props.KETERANGAN || props.ARAHAN || '-';
+            // Mapping for user-friendly descriptions
+            const KEMAMPUAN_LAHAN_DESC: Record<string, string> = {
+                'Penting I': 'Sangat Tinggi (Prioritas Utama)',
+                'Penting II': 'Tinggi (Prioritas Kedua)',
+                'Penting III': 'Sedang (Prioritas Ketiga)',
+                'Penting IV': 'Rendah (Prioritas Keempat)',
+                'Penting V': 'Sangat Rendah (Bukan Prioritas)'
+            };
+
+            const kelasKode = props.C_DDP || props.C_DTP || props.KELAS || '-';
+            const kelasDeskripsi = KEMAMPUAN_LAHAN_DESC[kelasKode] || kelasKode;
+
+            const penggunaanLahan = props.PL_SNI2014 || props.PENGGUNAAN || '-';
+            const arahan = props.KETERANGAN || props.ARAHAN || '-';
+
+            // Determine color for header based on priority
+            let headerColor = 'bg-lime-600';
+            if (kelasKode.includes('Penting I')) headerColor = 'bg-green-700';
+            else if (kelasKode.includes('Penting II')) headerColor = 'bg-lime-600';
+            else if (kelasKode.includes('Penting III')) headerColor = 'bg-yellow-600';
 
             popupContent = `
-                 <div class="min-w-[250px]">
-                      <div class="bg-lime-600 px-3 py-2 rounded-t-lg flex items-center justify-between">
-                         <h3 class="font-bold text-sm text-white">Kemampuan Lahan</h3>
+                 <div class="min-w-[280px]">
+                      <div class="${headerColor} px-4 py-3 rounded-t-lg flex items-center justify-between shadow-sm">
+                         <h3 class="font-bold text-sm text-white tracking-wide">Kemampuan Lahan</h3>
+                         <span class="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded backdrop-blur-sm">Lingkungan</span>
                     </div>
-                    <div class="p-4 bg-white rounded-b-lg border border-lime-100 shadow-sm">
-                        <div class="mb-3">
-                             <div class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Kelas</div>
-                             <div class="text-lg font-bold text-lime-800 leading-tight">${kelas}</div>
+                    <div class="p-4 bg-white rounded-b-lg border border-gray-200 shadow-lg relative">
+                        <div class="space-y-4">
+                            <div>
+                                 <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Penggunaan Lahan</div>
+                                 <div class="text-base font-bold text-gray-800 leading-tight">${penggunaanLahan}</div>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-3 rounded border border-gray-100">
+                                 <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Kelas Kemampuan</div>
+                                 <div class="text-lg font-bold text-gray-800 leading-none">${kelasDeskripsi}</div>
+                                 ${kelasKode !== kelasDeskripsi ? `<div class="text-xs text-gray-500 mt-1 font-mono">Kode: ${kelasKode}</div>` : ''}
+                            </div>
+
+                            ${arahan !== '-' ? `
+                            <div>
+                                 <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Arahan Pemanfaatan</div>
+                                 <div class="text-sm text-gray-600 leading-relaxed italic">
+                                     "${arahan}"
+                                 </div>
+                            </div>
+                            ` : ''}
                         </div>
-                        ${keterangan !== '-' ? `
-                        <div>
-                             <div class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Arahan Pemanfaatan</div>
-                             <div class="text-sm text-gray-700 leading-relaxed">
-                                 ${keterangan}
-                             </div>
-                        </div>
-                        ` : ''}
                     </div>
                  </div>
              `;
